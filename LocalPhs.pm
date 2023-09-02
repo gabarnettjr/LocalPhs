@@ -94,13 +94,14 @@ sub splines {
         $vals = $self->vals->row($j);
         for ($k = 0; $k < $self->nodes->numRows; $k++) {
             $diff = $self->nodes->row($k)->minus($self->nodes->row($j));
-            if ($k != $j && $diff->norm < $self->stencilRadius) {
+            if ($k != $j && $diff->norm() < $self->stencilRadius) {
                 $stencil = $stencil->vstack($diff);
                 $vals = $vals->vstack($self->vals->row($k));
             }
         }
         my $phs = Phs::new($self->rbfExponent, $self->polyDegree, $stencil, $vals);
         push(@{$splines}, $phs);
+        print "Stencil-size = " . $stencil->numRows() . "\n";
     }
     
     @{$self}[6] = $splines;
@@ -131,7 +132,7 @@ sub evaluate {
         $min = 99;
         for ($j = 0; $j < $self->nodes->numRows; $j++) {
             $node = $self->nodes->row($j);
-            $dist = ($point->minus($node))->norm;
+            $dist = $point->minus($node)->norm;
             if ($dist < $min) {
                 $min = $dist;
                 $ind = $j;
