@@ -5,6 +5,7 @@ Local high-dimensional interpolation using Polyharmonic Spline (PHS) Radial Basi
 An object of type "Matrix" can be created in multiple ways.
 * Matrix::new()
 * Matrix::zeros()
+** Requires numRows and numCols 
 * Matrix::ones()
 * Matrix::eye()
 * Matrix::linspace()
