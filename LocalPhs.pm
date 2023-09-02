@@ -87,14 +87,15 @@ sub splines {
     return @{$splines}[shift] if defined $splines;
 
     $splines = [];
-    my ($stencil, $vals, $j, $k);
+    my ($stencil, $vals, $j, $k, $diff);
 
     for ($j = 0; $j < $self->nodes->numRows; $j++) {
         $stencil = Matrix::zeros(1, $self->nodes->numCols);
         $vals = $self->vals->row($j);
         for ($k = 0; $k < $self->nodes->numRows; $k++) {
-            if ($k != $j && $self->nodes->row($j)->minus($self->nodes->row($k))->norm < $self->stencilRadius) {
-                $stencil = $stencil->vstack($self->nodes->row($k)->minus($self->nodes->row($j)));
+            $diff = $self->nodes->row($k)->minus($self->nodes->row($j));
+            if ($k != $j && $diff->norm < $self->stencilRadius) {
+                $stencil = $stencil->vstack($diff);
                 $vals = $vals->vstack($self->vals->row($k));
             }
         }
