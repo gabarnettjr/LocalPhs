@@ -145,7 +145,7 @@ sub poly {
     
     my $poly = Matrix::ones($evalPts->numRows, 1);
     
-    if ($self->polyDegree >= 1) {
+    if ($self->polyDegree() >= 1) {
         for (my $k = 0; $k < $self->dims; $k++) {
             $poly = $poly->hstack($evalPts->col($k));
         }
@@ -235,11 +235,16 @@ sub phi {
 sub testFunc2d {
     my $evalPts = shift;
     
-    my $i;
+    my ($i, $j, $tmp);
     my $out = Matrix::zeros($evalPts->numRows, 1);
     
-    for ($i = 0; $i < $out->numRows; $i++) {
-        $out->set($i, $evalPts->item($i, 0) ** 2 + $evalPts->item($i, 1));
+    for ($i = 0; $i < $evalPts->numRows; $i++) {
+        $tmp = 0;
+        for ($j = 0; $j < $evalPts->numCols; $j++) {
+            $tmp += cos(Matrix::pi() * $evalPts->item($i, $j));
+            # $out->set($i, $evalPts->item($i, 0) ** 1 + $evalPts->item($i, 1) ** 1);
+        }
+        $out->set($i, $tmp);
     }
     
     return $out;
