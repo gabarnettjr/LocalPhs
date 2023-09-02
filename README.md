@@ -1,5 +1,5 @@
 # LocalPhs
-Perform local high-dimensional interpolation using Polyharmonic Spline (PHS) Radial Basis functions (RBFs).
+Local high-dimensional interpolation using Polyharmonic Spline (PHS) Radial Basis functions (RBFs)
 ## Object Descriptions
 ### Matrix.pm
 An object of type "Matrix" can be created in multiple ways.
