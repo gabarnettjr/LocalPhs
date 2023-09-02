@@ -8,6 +8,7 @@ An object of type "Matrix" can be created in multiple ways.
 * Matrix::ones()
 * Matrix::eye()
 * Matrix::linspace()
+
 Every object of type "Matrix" has three attributes.
 * items
 * numRows
