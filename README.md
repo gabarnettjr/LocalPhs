@@ -5,5 +5,5 @@ Perform local high-dimensional interpolation using Polyharmonic Spline (PHS) Rad
 An object of type Phs must be given the following variables upon creation.
 * RBF exponent (1, 3, 5, ...)
 * Polynomial degree (0, 1)
-* Nodes ($n \times dims$ matrix)
-* Function values ($n$ \times 1 matrix)
+* Nodes ($n \times d$ matrix)
+* Function values ($n \times 1$ matrix)
