@@ -10,12 +10,12 @@ my $rbfExponent = 3;
 my $polyDegree = 1;
 
 # Define spatial domain [a,b] x [c,d], with m rows and n columns.
-my $a = -1;  my $b = 1;  my $n = 5;
-my $c = -1;  my $d = 1;  my $m = 5;
+my $a = -1;  my $b = 1;  my $n = 6;
+my $c = -1;  my $d = 1;  my $m = 6;
 
 # Define number of rows (M) and columns (N) for evaluation points.
-my $M = 12;
-my $N = 12;
+my $M = 10;
+my $N = 10;
 
 # Define the size of the stencil.
 my $stencilRadius = 1;
