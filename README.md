@@ -14,13 +14,13 @@ Every object of type "Matrix" has three attributes.
 * numRows
 * numCols
 ### Phs.pm
-An object of type "Phs" must be given the following variables upon creation.
+An object of type "Phs" requires 4 variables for initialization.
 * RBF exponent (1, 3, 5, ...)
 * Polynomial degree (0, 1)
 * Nodes ($n \times d$ matrix)
 * Function values ($n \times 1$ matrix)
 ### LocalPhs.pm
-An object of type "LocalPhs" is initialized with the following variables.
+An object of type "LocalPhs" requires 5 variables for initialization.
 * RBF exponent (1, 3, 5, ...)
 * Maximum polynomial degree (0, 1)
 * Nodes ($n \times d$ matrix)
