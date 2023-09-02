@@ -10,12 +10,12 @@ my $rbfExponent = 3;
 my $polyDegree = 1;
 
 # Define spatial domain [a,b] x [c,d], with m rows and n columns.
-my $a = -1;  my $b = 1;  my $n = 4;
-my $c = -1;  my $d = 1;  my $m = 4;
+my $a = -1;  my $b = 1;  my $n = 6;
+my $c = -1;  my $d = 1;  my $m = 6;
 
 # Define number of rows (M) and columns (N) for evaluation points.
-my $M = 7;
-my $N = 7;
+my $M = 10;
+my $N = 10;
 
 ################################################################################
 
@@ -56,7 +56,7 @@ eval {
     print "\$ZZ = \n";
     $ZZ->transpose->disp;
     print "\n";
-    $diff = $estimate->plus($ZZ->dot(-1));
+    $diff = $estimate->minus($ZZ);
     print "\$diff = \n";
     $diff->transpose->disp;
 };
