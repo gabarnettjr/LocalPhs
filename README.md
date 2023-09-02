@@ -5,10 +5,17 @@ Local high-dimensional interpolation using Polyharmonic Spline (PHS) Radial Basi
 An object of type "Matrix" can be created in multiple ways.
 * Matrix::new()
 * Matrix::zeros()
-  * Requires numRows and numCols 
+  * numRows
+  * numCols
 * Matrix::ones()
+  * numRows
+  * numCols
 * Matrix::eye()
+  * numRows (numRows and numCols are the same for an identity matrix)
 * Matrix::linspace()
+  * Minimum value
+  * Maximum value
+  * Number of steps
 
 Every object of type "Matrix" has three attributes.
 * items
