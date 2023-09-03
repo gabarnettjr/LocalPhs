@@ -6,13 +6,13 @@ use warnings;
 use lib ".";
 use LocalPhs;
 
-my $dims = 2;                                                       # dimensions
+my $dims = 3;                                                       # dimensions
 my $rbfExponent = 3;                 # odd number exponent to use in the phs rbf
 my $polyDegree = 1;                     # maximum polynomial degree in the basis
 my $a = -1;  my $b = 1;                                   # bounds on the domain
-my $n = 100;                                                   # number of nodes
-my $N = 1000;                                      # number of evaluation points
-my $stencilRadius = 5/8;    # how far away to look for neighbors of a given node
+my $n = 1000;                                                  # number of nodes
+my $N = 100;                                       # number of evaluation points
+my $stencilRadius = 4/8;    # how far away to look for neighbors of a given node
 
 ################################################################################
 
@@ -45,3 +45,4 @@ eval {
     print "average error = " . $diff->norm(1) / $diff->len . "\n";
 };
 die if $@;
+
