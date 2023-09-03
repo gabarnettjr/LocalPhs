@@ -123,7 +123,7 @@ sub coeffs {
         $p = $self->poly($self->nodes);
         $A = $A->hstack($p);
         $null = Matrix::zeros($p->numCols, $p->numCols);
-        $A = $A->vstack($p->transpose->hstack($null));
+        $A = $A->vstack($p->vstack($null)->transpose);
     };
     die if $@;
     
@@ -132,7 +132,7 @@ sub coeffs {
     $coeffs = $A->solve($self->vals->vstack($null));
     @{$self}[6] = $coeffs;
     return $coeffs if ! scalar @_;
-    die "Failed to get PHS coefficients.";
+    die "Failed to get the PHS interpolation coefficients.";
 }
 
 ################################################################################
