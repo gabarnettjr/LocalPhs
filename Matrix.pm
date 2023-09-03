@@ -319,8 +319,8 @@ sub row {
     my $self = shift;
     my $i = shift;
     
-    my $row = @{$self->items}[$i];
-    my $out = Matrix::new([$row]);
+    my $out = @{$self->items}[$i];
+    $out = Matrix::new([$out]);
     
     return $out;
 }
