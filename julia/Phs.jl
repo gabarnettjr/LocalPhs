@@ -12,11 +12,3 @@ end
 # function Phs_coeffs(phs::Phs)
     # A = Phs_phi(Phs_r(Phs.nodes)
 # end
-
-dims = 2
-rbfExponent = 3
-polyDegree = 1
-nodes = [1 2; 3 4; 5 6]
-vals = [1; 2; 3]
-
-phs = Phs(dims, rbfExponent, polyDegree, nodes, vals)
