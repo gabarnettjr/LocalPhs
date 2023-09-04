@@ -59,7 +59,7 @@ end
 
 function LocalPhs_evaluate(self::LocalPhs, evalPts::Matrix{Float64})
     ind = 0
-    tmp = zeros(1, self.dims)
+    diff = zeros(1, self.dims)
     out = zeros(size(evalPts, 1), 1)
 
     t = time()
@@ -75,8 +75,8 @@ function LocalPhs_evaluate(self::LocalPhs, evalPts::Matrix{Float64})
                 ind = j
             end
         end
-        tmp[1, :] = point - self.nodes[ind, :]
-        out[i] = Phs_evaluate(LocalPhs_splines(self, ind), tmp)[1,1]
+        diff[1, :] = point - self.nodes[ind, :]
+        out[i] = Phs_evaluate(LocalPhs_splines(self, ind), diff)[1,1]
     end
     
     t = time() - t
