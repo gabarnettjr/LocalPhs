@@ -48,12 +48,11 @@ function LocalPhs_splines(self::LocalPhs, ind::Int64)
         end
     end
     
-    phs = Phs_new(self.rbfExponent, self.polyDegree, stencil, vals)
-    self.splines[ind] = phs
+    self.splines[ind] = Phs_new(self.rbfExponent, self.polyDegree, stencil, vals)
     
     println("Stencil-size = ", size(stencil, 1))
     
-    return phs
+    return self.splines[ind]
 end
 
 ################################################################################
