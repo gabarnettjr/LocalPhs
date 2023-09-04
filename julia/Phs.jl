@@ -1,6 +1,7 @@
 
 mutable struct Phs
     isNull::Bool
+    stencilSize::Int64
     dims::Int64
 
     rbfExponent::Int64
@@ -11,6 +12,7 @@ mutable struct Phs
     coeffs::Matrix{Float64}
 end
 
+################################################################################
 
 function Phs_new(rbfExponent::Int64, polyDegree::Int64, nodes::Matrix{Float64}, vals::Matrix{Float64})
     # Make a new object of type Phs.
@@ -19,15 +21,16 @@ function Phs_new(rbfExponent::Int64, polyDegree::Int64, nodes::Matrix{Float64}, 
     else
         isNull = false
     end
-    self = Phs(isNull, size(nodes, 2), rbfExponent, polyDegree, nodes, vals, zeros(1, 1))
+    self = Phs(isNull, size(nodes, 1), size(nodes, 2), rbfExponent, polyDegree, nodes, vals, zeros(1, 1))
     return self
 end
 
+################################################################################
 
 function Phs_coeffs(self::Phs)
     # Use the nodes and function vals to determine the PHS coefficients.
     if ! (self.coeffs == zeros(1, 1))
-        println("re-using coefficients.")
+        println("Re-used coefficients.")
         return self.coeffs
     end
     
@@ -44,6 +47,7 @@ function Phs_coeffs(self::Phs)
     return self.coeffs
 end
 
+################################################################################
 
 function Phs_poly(self::Phs, evalPts::Matrix{Float64})
     # The polynomial portion of the combined A-matrix.
@@ -58,6 +62,7 @@ function Phs_poly(self::Phs, evalPts::Matrix{Float64})
     return poly
 end
 
+################################################################################
 
 function Phs_evaluate(self::Phs, evalPts::Matrix{Float64})
     # Evaluate the PHS at the $evalPts.
@@ -67,13 +72,14 @@ function Phs_evaluate(self::Phs, evalPts::Matrix{Float64})
     return out
 end
 
+################################################################################
 
 function Phs_phi(self::Phs, evalPts::Matrix{Float64})
     # Radius matrix that can be used to create an A-matrix using an RBF.
-    phi = zeros(size(evalPts, 1), size(self.nodes, 1))
+    phi = zeros(size(evalPts, 1), self.stencilSize)
     
     for i = 1 : size(evalPts, 1)
-        for j = 1 : size(self.nodes, 1)
+        for j = 1 : self.stencilSize
             r = 0
             for k = 1 : self.dims
                 r += (evalPts[i, k] - self.nodes[j, k]) ^ 2
@@ -85,18 +91,23 @@ function Phs_phi(self::Phs, evalPts::Matrix{Float64})
     return phi
 end
 
+################################################################################
 
-function Phs_testFunc2d(evalPts::Matrix{Float64})
+function Phs_testFunc(evalPts::Matrix{Float64})
     out = zeros(size(evalPts, 1), 1)
     
     for i = 1 : size(evalPts, 1)
-        tmp = 0
+        tmp = 1
         for j = 1 : size(evalPts, 2)
-            tmp += cos(pi * evalPts[i, j])
+            # tmp += evalPts[i, j]
+            tmp *= cos(pi * evalPts[i, j])
         end
         out[i] = tmp
     end
     
     return out
 end
+
+################################################################################
+
 
