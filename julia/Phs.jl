@@ -69,33 +69,17 @@ function Phs_evaluate(self::Phs, evalPts::Matrix{Float64})
 end
 
 
-function Phs_r(self::Phs, evalPts::Matrix{Float64})
+function Phs_phi(self::Phs, evalPts::Matrix{Float64})
     # Radius matrix that can be used to create an A-matrix using an RBF.
-    r = zeros(size(evalPts, 1), size(self.nodes, 1))
+    phi = zeros(size(evalPts, 1), size(self.nodes, 1))
     
     for i = 1 : size(evalPts, 1)
         for j = 1 : size(self.nodes, 1)
-            tmp = 0
+            r = 0
             for k = 1 : self.dims
-                tmp += (evalPts[i, k] - self.nodes[j, k]) ^ 2
+                r += (evalPts[i, k] - self.nodes[j, k]) ^ 2
             end
-            r[i, j] = sqrt(tmp)
-        end
-    end
-    
-    return r
-end
-
-
-function Phs_phi(self::Phs, evalPts::Matrix{Float64})
-    # The RBF portion of the combined A-matrix.
-    
-    r = Phs_r(self, evalPts)
-    phi = zeros(size(r))
-    
-    for i = 1 : size(phi, 1)
-        for j = 1 : size(phi, 2)
-            phi[i, j] = r[i, j] ^ self.rbfExponent
+            phi[i, j] = sqrt(r) ^ self.rbfExponent
         end
     end
     
