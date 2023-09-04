@@ -47,7 +47,6 @@ end
 
 function Phs_poly(self::Phs, evalPts::Matrix{Float64})
     # The polynomial portion of the combined A-matrix.
-    
     poly = ones(size(evalPts, 1), 1)
     
     if (self.polyDegree >= 1)
