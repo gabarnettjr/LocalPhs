@@ -53,4 +53,5 @@ estimate = LocalPhs_evaluate(phs, evalPts)
 diff = estimate - zzEvalPts
 println("average error = ", norm(diff, 1) / length(diff))
 println("maximum error = ", norm(diff, Inf))
+println("error std dev = ", norm(diff, 2) / (length(diff) - 1))
 
