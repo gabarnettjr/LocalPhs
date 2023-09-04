@@ -81,7 +81,7 @@ function LocalPhs_evaluate(self::LocalPhs, evalPts::Matrix{Float64})
     
     t = time() - t
     
-    println("To evaluate local interpolants took ", t, " seconds.")
+    println("It took $t seconds to evaluate ", size(evalPts, 1), " local interpolants on ", size(self.nodes, 1), " nodes in ", self.dims, " dimensions.")
     
     return out
 end
