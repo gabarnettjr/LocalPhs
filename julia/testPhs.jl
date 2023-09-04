@@ -34,12 +34,12 @@ end
 x = range(a, stop = b, length = n)
 y = range(c, stop = d, length = m)
 nodes = makeNodes(x, y)
-zz = Phs_testFunc2d(nodes)
+zz = Phs_testFunc(nodes)
 
 X = range(a, stop = b, length = N)
 Y = range(c, stop = d, length = M)
 NODES = makeNodes(X, Y)
-ZZ = Phs_testFunc2d(NODES)
+ZZ = Phs_testFunc(NODES)
 
 spline = Phs_new(rbfExponent, polyDegree, nodes, zz)
 estimate = Phs_evaluate(spline, NODES)
