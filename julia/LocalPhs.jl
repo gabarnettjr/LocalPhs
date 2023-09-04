@@ -29,7 +29,7 @@ end
 
 function LocalPhs_splines(self::LocalPhs, ind::Int64)
     if ! self.splines[ind].isNull
-        println("re-using a spline.")
+        print("Stencil-size = ", self.splines[ind].stencilSize, ".  Re-used a spline.  ")
         return self.splines[ind]
     end
 
@@ -76,12 +76,12 @@ function LocalPhs_evaluate(self::LocalPhs, evalPts::Matrix{Float64})
             end
         end
         diff[1, :] = point - self.nodes[ind, :]
-        out[i] = Phs_evaluate(LocalPhs_splines(self, ind), diff)[1,1]
+        out[i] = Phs_evaluate(LocalPhs_splines(self, ind), diff)[1, 1]
     end
     
     t = time() - t
     
-    println("To evaluate relevant splines took ", t, " seconds.")
+    println("To evaluate local interpolants took ", t, " seconds.")
     
     return out
 end
