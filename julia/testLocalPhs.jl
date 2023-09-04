@@ -13,7 +13,7 @@ a = -1;  b = 1                  # bounds on the domain (used for all dimensions)
 nNodes = 100000                                                # number of nodes
 nEvalPts = 100                                     # number of evaluation points
 stencilRadius = 3/8         # how far away to look for neighbors of a given node
-useHalton = false        # boolean to decide if you want to use halton or random
+useHalton = true         # boolean to decide if you want to use halton or random
 
 ################################################################################
 
@@ -50,8 +50,9 @@ phs = LocalPhs_new(rbfExponent, polyDegree, nodes, zzNodes, stencilRadius)
 estimate = LocalPhs_evaluate(phs, evalPts)
 
 # Check the error against the true underlying function at the evalPts.
-diff = estimate - zzEvalPts
-println("average error = ", norm(diff, 1) / length(diff))
+diff = abs.(estimate[:] - zzEvalPts[:])
+avgErr = norm(diff, 1) / length(diff)
+println("average error = ", avgErr)
 println("maximum error = ", norm(diff, Inf))
-println("error std dev = ", norm(diff, 2) / (length(diff) - 1))
+println("error std dev = ", norm(diff .- avgErr, 2) / (length(diff) - 1))
 
