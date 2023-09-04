@@ -27,5 +27,6 @@ phs = LocalPhs_new(rbfExponent, polyDegree, nodes, zz, stencilRadius)
 estimate = LocalPhs_evaluate(phs, NODES)
 
 diff = estimate - ZZ
-print("average error = ", norm(diff, 1) / length(diff), "\n")
+println("average error = ", norm(diff, 1) / length(diff))
+println("maximum error = ", norm(diff, Inf))
 
