@@ -1,6 +1,18 @@
 
 include("Phs.jl")
 
+# Mutable structure (attributes) and methods for creating objects of type
+# LocalPhs.  PHS stands for polyharmonic spline, and it is a particular type of
+# radial basis function (RBF) that does not have a "shape parameter."  When
+# given a collection of nodes and corresponding known function values at the
+# nodes, a LocalPhs object can be used to interpolate the known data locally and
+# estimate the value of the underlying function on a collection of so-called
+# evaluation points.  The interpolation is local because it is constructed using
+# only the nodes in a specified radius (stencilRadius) of an evaluation point.
+
+# Greg Barnett
+# September 2023
+
 ################################################################################
 
 mutable struct LocalPhs
