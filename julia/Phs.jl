@@ -1,4 +1,16 @@
 
+# Mutable structure (attributes) and methods for creating and manipulating Phs
+# objects.  PHS stands for Polyharmonic Spline, which is a certain type of
+# radial basis function (RBF) that does not require a "shape parameter."
+# The Phs object can be used by itself to create global approximations, or it
+# can be used many times during the creation of a LocalPhs object.
+# See LocalPhs.jl for more information on local PHS approximations.
+
+# Greg Barnett
+# September 2023
+
+################################################################################
+
 mutable struct Phs
     isNull::Bool
     stencilSize::Int64
@@ -28,7 +40,7 @@ end
 ################################################################################
 
 function Phs_coeffs(self::Phs)
-    # Use the nodes and function vals to determine the PHS coefficients.
+    # Use the nodes and function vals to determine the Phs coefficients.
     if ! (self.coeffs == zeros(1, 1))
         println("Re-used coefficients.")
         return self.coeffs
@@ -65,7 +77,7 @@ end
 ################################################################################
 
 function Phs_evaluate(self::Phs, evalPts::Matrix{Float64})
-    # Evaluate the PHS at the $evalPts.
+    # Evaluate the Phs at the evalPts.
     
     out = hcat(Phs_phi(self, evalPts), Phs_poly(self, evalPts)) * Phs_coeffs(self)
     
@@ -99,8 +111,8 @@ function Phs_testFunc(evalPts::Matrix{Float64})
     for i = 1 : size(evalPts, 1)
         tmp = 1
         for j = 1 : size(evalPts, 2)
-            # tmp += evalPts[i, j]
             tmp *= cos(pi * evalPts[i, j])
+            # tmp += evalPts[i, j]
         end
         out[i] = tmp
     end
