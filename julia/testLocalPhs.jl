@@ -6,14 +6,22 @@ include("LocalPhs.jl")
 
 ################################################################################
 
+# A script for testing the speed and accuracy of local polyharmonic spline (PHS)
+# interpolation of scattered data in high dimensions (up to 7).
+
+# Greg Barnett
+# September 2023
+
+################################################################################
+
 dims = 5                                      # dimensions (1, 2, 3, 4, 5, 6, 7)
 rbfExponent = 3                  # odd number exponent to use in the phs rbf (3)
 polyDegree = 1                      # maximum polynomial degree in the basis (1)
 a = -1;  b = 1                  # bounds on the domain (used for all dimensions)
 nNodes = 100000                                                # number of nodes
 nEvalPts = 100                                     # number of evaluation points
-stencilRadius = 3/8         # how far away to look for neighbors of a given node
-useHalton = true         # boolean to decide if you want to use halton or random
+stencilRadius = 6/16        # how far away to look for neighbors of a given node
+useHalton = false        # boolean to decide if you want to use halton or random
 
 ################################################################################
 
