@@ -12,7 +12,7 @@ include("LocalPhs.jl")
 
 rbfExponent = 3                  # odd number exponent to use in the phs rbf (3)
 polyDegree = 1                      # maximum polynomial degree in the basis (1)
-stencilRadius = 6/16        # how far away to look for neighbors of a given node
+stencilRadius = 20          # how far away to look for neighbors of a given node
 
 ################################################################################
 
@@ -32,8 +32,12 @@ println("dims = $dims")
 numNodes = length(nodes)
 println("numNodes = $numNodes")
 
+numEvalPts = length(evalPts)
+println("numEvalPts = $numEvalPts")
+
 nodesMatrix = zeros(numNodes, dims)
 valuesMatrix = zeros(numNodes, 1)
+
 for i = 1 : numNodes
     tmp = split(nodes[i], r"\s+")
     for j = 1 : dims
@@ -42,13 +46,17 @@ for i = 1 : numNodes
     valuesMatrix[i, 1] = parse(Float64, values[i])
 end
 
-evalPtsMatrix = zeros(length(evalPts), dims);
-for i = 1 : length(evalPts)
+evalPtsMatrix = zeros(numEvalPts, dims);
+for i = 1 : numEvalPts
     tmp = split(evalPts[i], r"\s+")
     for j = 1 : dims
         evalPtsMatrix[i, j] = parse(Float64, tmp[j])
     end
 end
+
+nodesMatrix = nodesMatrix + rand(size(nodesMatrix, 1), size(nodesMatrix, 2))
+valuesMatrix = valuesMatrix + rand(size(valuesMatrix, 1), size(valuesMatrix, 2))
+evalPtsMatrix = evalPtsMatrix + rand(size(evalPtsMatrix, 1), size(evalPtsMatrix, 2))
 
 println("nodes = ", nodesMatrix)
 println("values = ", valuesMatrix)
