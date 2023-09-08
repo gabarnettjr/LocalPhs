@@ -54,11 +54,12 @@ println("numEvalPts = $numEvalPts")
 
 # Get the nodes, values, and evalPts in matrix form, to be used by LocalPhs.jl
 
-nodesMatrix = zeros(numNodes, dims)
-valuesMatrix = zeros(numNodes, 1)
+nodesMatrix   = zeros(numNodes,   dims)
+valuesMatrix  = zeros(numNodes,   1)
 evalPtsMatrix = zeros(numEvalPts, dims)
 
 if debug;  print("nodesMatrix = \n");  end
+
 for i = 1 : numNodes
     local tmp = split(nodes[i], r"\s+")
     if ! contains(tmp[1], r"\S+");  tmp = tmp[2:end];  end
@@ -68,16 +69,20 @@ for i = 1 : numNodes
     end
     if debug;  print("END\n");  end
 end
+
 if debug;  print("END\n\n");  end
 
 if debug;  print("valuesMatrix = \n");  end
+
 for i = 1 : numNodes
     valuesMatrix[i, 1] = parse(Float64, values[i])
     if debug;  @printf("% 1.2e\n", valuesMatrix[i, 1]);  end
 end
+
 if debug;  print("END\n\n");  end
 
 if debug;  print("evalPtsMatrix = \n");  end
+
 for i = 1 : numEvalPts
     local tmp = split(evalPts[i], r"\s+")
     if ! contains(tmp[1], r"\S+");  tmp = tmp[2:end];  end
@@ -87,6 +92,7 @@ for i = 1 : numEvalPts
     end
     if debug;  print("END\n");  end
 end
+
 if debug;  print("\n");  end
 
 ################################################################################
@@ -101,5 +107,5 @@ open("estimates.txt", "w") do file
         @printf(file, "% 1.16e\n", estimates[i])
     end
 end
-println("Estimates saved to file estimates.txt")
+println("Estimates saved to file \"estimates.txt\"")
 
