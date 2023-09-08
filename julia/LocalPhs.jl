@@ -1,4 +1,6 @@
 
+using LinearAlgebra
+
 include("Phs.jl")
 
 # Mutable structure (attributes) and methods for creating objects of type
