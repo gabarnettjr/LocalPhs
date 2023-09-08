@@ -28,15 +28,14 @@ evalPts = readlines(pathToEvalPts)
 
 dims = length(split(nodes[1], r"\s+"))
 println("dims = $dims")
-
 numNodes = length(nodes)
 println("numNodes = $numNodes")
-
 numEvalPts = length(evalPts)
 println("numEvalPts = $numEvalPts")
 
 nodesMatrix = zeros(numNodes, dims)
 valuesMatrix = zeros(numNodes, 1)
+evalPtsMatrix = zeros(numEvalPts, dims);
 
 for i = 1 : numNodes
     tmp = split(nodes[i], r"\s+")
@@ -46,7 +45,6 @@ for i = 1 : numNodes
     valuesMatrix[i, 1] = parse(Float64, values[i])
 end
 
-evalPtsMatrix = zeros(numEvalPts, dims);
 for i = 1 : numEvalPts
     tmp = split(evalPts[i], r"\s+")
     for j = 1 : dims
@@ -54,9 +52,9 @@ for i = 1 : numEvalPts
     end
 end
 
-nodesMatrix = nodesMatrix + rand(size(nodesMatrix, 1), size(nodesMatrix, 2))
-valuesMatrix = valuesMatrix + rand(size(valuesMatrix, 1), size(valuesMatrix, 2))
-evalPtsMatrix = evalPtsMatrix + rand(size(evalPtsMatrix, 1), size(evalPtsMatrix, 2))
+nodesMatrix = nodesMatrix .+ rand(size(nodesMatrix, 1), size(nodesMatrix, 2))
+valuesMatrix = valuesMatrix .+ rand(size(valuesMatrix, 1), size(valuesMatrix, 2))
+evalPtsMatrix = evalPtsMatrix .+ rand(size(evalPtsMatrix, 1), size(evalPtsMatrix, 2))
 
 println("nodes = ", nodesMatrix)
 println("values = ", valuesMatrix)
