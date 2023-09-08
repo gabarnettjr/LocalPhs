@@ -102,10 +102,10 @@ phs = LocalPhs_new(3, 1, nodesMatrix, valuesMatrix, stencilRadius)
 estimates = LocalPhs_evaluate(phs, evalPtsMatrix)
 
 # Save the estimates in a text file.
-open("estimates.txt", "w") do file
+open("data/estimates.txt", "w") do file
     for i = 1 : length(estimates)
         @printf(file, "% 1.16e\n", estimates[i])
     end
 end
-println("Estimates saved to file \"estimates.txt\"")
+println("Estimates saved to file \"data/estimates.txt\"")
 
