@@ -47,21 +47,35 @@ function LocalPhs_splines(self::LocalPhs, ind::Int64)
         return self.splines[ind]
     end
 
-    diff = zeros(1, self.dims)
+    tmpRadius = self.stencilRadius
     stencil = zeros(1, self.dims)
-    val = zeros(1, 1)
     vals = zeros(1, 1)
-    vals[1,:] = self.vals[ind, :]
-    
-    for k = 1 : size(self.nodes, 1)
-        diff[1,:] = self.nodes[k, :] - self.nodes[ind, :]
-        val[1,:] = self.vals[k,:]
-        if (k != ind) && (norm(diff) < self.stencilRadius)
-            stencil = vcat(stencil, diff)
-            vals = vcat(vals, val)
+
+    while (true)
+        diff = zeros(1, self.dims)
+        stencil = zeros(1, self.dims)
+        val = zeros(1, 1)
+        vals = zeros(1, 1)
+        vals[1,:] = self.vals[ind, :]
+        
+        for k = 1 : size(self.nodes, 1)
+            diff[1,:] = self.nodes[k, :] - self.nodes[ind, :]
+            val[1,:] = self.vals[k,:]
+            if (k != ind) && (norm(diff) < tmpRadius)
+                stencil = vcat(stencil, diff)
+                vals = vcat(vals, val)
+            end
+        end
+
+        if (size(stencil, 1) >= 20) && (size(stencil, 1) <= 300)
+            break
+        elseif (size(stencil, 1) < 20)
+            tmpRadius *= 2
+        elseif (size(stencil, 1) > 300)
+            tmpRadius /= 2
         end
     end
-    
+
     self.splines[ind] = Phs_new(self.rbfExponent, self.polyDegree, stencil, vals)
     
     println("Stencil-size = ", size(stencil, 1))
