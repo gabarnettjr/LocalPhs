@@ -97,6 +97,19 @@ if debug;  print("\n");  end
 
 ################################################################################
 
+# Take care of nodes that are too close to each other.
+for i = numNodes : -1 : 1
+    for j = 1 : i - 1
+        if (norm(nodesMatrix[i, :] - nodesMatrix[j, :]) < 1e-12)
+            global nodesMatrix = vcat(nodesMatrix[1:i-1, :], nodesMatrix[i+1:end, :])
+            global valuesMatrix[j, 1] = (valuesMatrix[j, 1] + valuesMatrix[i, 1]) / 2
+            global valuesMatrix = vcat(valuesMatrix[1:i-1, :], valuesMatrix[i+1:end, :])
+        end
+    end
+end
+
+################################################################################
+
 # Use a local PHS interpolant to estimate the function at the evalPts.
 phs = LocalPhs_new(3, 1, nodesMatrix, valuesMatrix, stencilRadius)
 estimates = LocalPhs_evaluate(phs, evalPtsMatrix)
@@ -104,8 +117,10 @@ estimates = LocalPhs_evaluate(phs, evalPtsMatrix)
 # Save the estimates in a text file.
 open("data/estimates.txt", "w") do file
     for i = 1 : length(estimates)
-        @printf(file, "% 1.16e\n", estimates[i])
+        @printf(file, "% 4.2f\n", estimates[i])
     end
 end
 println("Estimates saved to file \"data/estimates.txt\"")
+
+################################################################################
 
