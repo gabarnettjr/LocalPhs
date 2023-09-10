@@ -70,7 +70,7 @@ function LocalPhs_splines(self::LocalPhs, ind::Int64)
         if (size(stencil, 1) >= 20) && (size(stencil, 1) <= 300)
             break
         elseif (size(stencil, 1) < 20)
-            tmpRadius *= 2
+            tmpRadius += self.stencilRadius
         elseif (size(stencil, 1) > 300)
             tmpRadius /= 2
         end
