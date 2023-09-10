@@ -16,18 +16,22 @@ include("LocalPhs.jl")
 
 ################################################################################
 
-rbfExponent = 3                  # odd number exponent to use in the phs rbf (3)
-polyDegree = 1                      # maximum polynomial degree in the basis (1)
-stencilRadius = 1.0         # how far away to look for neighbors of a given node
+rbfExponent = 1                  # odd number exponent to use in the phs rbf (3)
+polyDegree = 0                      # maximum polynomial degree in the basis (1)
+stencilRadius = 1.0              # how far away to look (initially)for neighbors
 debug = false
 
-pathToNodes    = ARGS[1]
-pathToValues   = ARGS[2]
-pathToEvalPts  = ARGS[3]
+pathToNodes     = ARGS[1]
+pathToValues    = ARGS[2]
+pathToEvalPts   = ARGS[3]
+pathToEstimates = ARGS[4]
 
+println("rbfExponent = ", rbfExponent)
+println("polyDegree  = ", polyDegree)
 println("ARGS[1] = ", pathToNodes)
 println("ARGS[2] = ", pathToValues)
 println("ARGS[3] = ", pathToEvalPts)
+println("ARGS[4] = ", pathToEstimates)
 
 ################################################################################
 
@@ -100,9 +104,11 @@ if debug;  print("\n");  end
 # Take care of nodes that are too close to each other.
 for i = numNodes : -1 : 1
     for j = 1 : i - 1
-        if (norm(nodesMatrix[i, :] - nodesMatrix[j, :]) < 1e-12)
-            global nodesMatrix = vcat(nodesMatrix[1:i-1, :], nodesMatrix[i+1:end, :])
-            global valuesMatrix[j, 1] = (valuesMatrix[j, 1] + valuesMatrix[i, 1]) / 2
+        if (norm(nodesMatrix[i, :] - nodesMatrix[j, :]) < .09)
+            println("Averaging nodes $i (", nodesMatrix[i,:], ", ", valuesMatrix[i,1], ") and $j (", nodesMatrix[j,:], ", ", valuesMatrix[j,1], ").")
+            global nodesMatrix[j, :]  = (nodesMatrix[j, :]  + nodesMatrix[i, :])  / 2
+            global valuesMatrix[j, :] = (valuesMatrix[j, :] + valuesMatrix[i, :]) / 2
+            global nodesMatrix  = vcat( nodesMatrix[1:i-1, :], nodesMatrix[i+1:end, :] )
             global valuesMatrix = vcat(valuesMatrix[1:i-1, :], valuesMatrix[i+1:end, :])
         end
     end
@@ -111,16 +117,16 @@ end
 ################################################################################
 
 # Use a local PHS interpolant to estimate the function at the evalPts.
-phs = LocalPhs_new(3, 1, nodesMatrix, valuesMatrix, stencilRadius)
+phs = LocalPhs_new(rbfExponent, polyDegree, nodesMatrix, valuesMatrix, stencilRadius)
 estimates = LocalPhs_evaluate(phs, evalPtsMatrix)
 
 # Save the estimates in a text file.
-open("data/estimates.txt", "w") do file
+open(pathToEstimates, "w") do file
     for i = 1 : length(estimates)
-        @printf(file, "% 4.2f\n", estimates[i])
+        @printf(file, "% 5.3f\n", estimates[i])
     end
 end
-println("Estimates saved to file \"data/estimates.txt\"")
+println("Estimates saved to file \"$pathToEstimates\"")
 
 ################################################################################
 
