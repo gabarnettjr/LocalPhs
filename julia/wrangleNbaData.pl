@@ -82,7 +82,9 @@ foreach my $file (@filesOpp) {
     my @nba = <NBA>;  close NBA;
     foreach my $line (@nba) {
         my @line = split /\s+/, $line;
-        shift @line while $line[0] =~ /\D+/;
+        while ($line[0] =~ /D+/) {
+            shift @line;
+        }
         my $key = 'nodes';
         $key = 'evalPts' if $file eq '2022_2023.txt';
         push @{$pto{$key}}, $line[23] if $case == 2;
