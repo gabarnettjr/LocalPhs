@@ -98,7 +98,7 @@ if debug;  print("\n");  end
 ################################################################################
 
 # Take care of nodes that are too close to each other.
-for i = numNodes : -1 : 1
+for i = numNodes : -1 : 2
     for j = 1 : i - 1
         if (norm(nodesMatrix[i, :] - nodesMatrix[j, :]) < .09)
             println("Averaging nodes $i (", nodesMatrix[i,:], ", ", valuesMatrix[i,1], ") and $j (", nodesMatrix[j,:], ", ", valuesMatrix[j,1], ").")
