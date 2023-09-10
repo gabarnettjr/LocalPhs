@@ -7,10 +7,6 @@ include("LocalPhs.jl")
 
 # Interpolate locally to estimate values.
 
-# nodes is   numNodes   x dims
-# values is  numNodes   x 1
-# evalPts is numEvalPts x dims
-
 # Greg Barnett
 # September 2023
 
