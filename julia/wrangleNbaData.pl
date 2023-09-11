@@ -5,6 +5,9 @@ use warnings;
 
 ################################################################################
 
+# case 1: field goal pct, defensive rebounds, turnovers.
+# case 2: points, defensive rebounds, opponent points.
+# case 3: points, opponent points.
 my $case = 2;
 
 # Get the columns you are interested in from the raw NBA stat data.
@@ -53,7 +56,7 @@ foreach my $file (@files) {
         if ($line =~ /^\d+\s+/) {
             my @line = split /\s+/, $line;
             my $key = 'nodes';
-            $key = 'evalPts' if ($file eq '2022_2023.txt');
+            $key = 'evalPts' if $file eq '2022_2023.txt';
             if ($case == 1) {
                 push @{$fgp{$key}}, $line[8];
                 push @{$drb{$key}}, $line[16];
