@@ -98,6 +98,7 @@ if debug;  print("\n");  end
 ################################################################################
 
 # Take care of nodes that are too close to each other.
+
 for i = numNodes : -1 : 2
     for j = 1 : i - 1
         if (norm(nodesMatrix[i, :] - nodesMatrix[j, :]) < .09)
