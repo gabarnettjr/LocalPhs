@@ -39,6 +39,10 @@ if ($case == 1) {
 
     $drb{'nodes'} = [];
     $drb{'evalPts'} = [];
+
+} elsif ($case == 3) {
+    $pts{'nodes'} = [];
+    $pts{'evalPts'} = [];
 }
 
 foreach my $file (@files) {
@@ -57,6 +61,9 @@ foreach my $file (@files) {
             } elsif ($case == 2) {
                 push @{$pts{$key}}, $line[5];
                 push @{$drb{$key}}, $line[16];
+            } elsif ($case == 3) {
+                push @{$pts{$key}}, $line[5];
+                push @{$drb{$key}}, $line[16];
             }
             push @wpc, $line[3] if $key eq 'nodes';
         }
@@ -69,7 +76,7 @@ foreach my $file (@files) {
 
 my %pto;
 
-if ($case == 2) {
+if ($case == 2 || $case == 3) {
     $pto{'nodes'} = [];
     $pto{'evalPts'} = [];
 }
@@ -81,14 +88,14 @@ foreach my $file (@filesOpp) {
     (open NBA, "<nbaTeamDataOpp/$file") || die "Failed to open file for reading.";
     my @nba = <NBA>;  close NBA;
     foreach my $line (@nba) {
-        my @line = split /\s+/, $line;
-        while ($line[0] =~ /\D+/) {
-            shift @line;
+        if ($line =~ /\S+/) {
+            my @line = split /\s+/, $line;
+            shift @line while $line[0] =~ /\D+/;
+            my $key = 'nodes';
+            $key = 'evalPts' if $file eq '2022_2023.txt';
+            push @{$pto{$key}}, $line[23] if $case == 2 || $case == 3;
+            $numTeams++ if $key eq 'evalPts';
         }
-        my $key = 'nodes';
-        $key = 'evalPts' if $file eq '2022_2023.txt';
-        push @{$pto{$key}}, $line[23] if $case == 2;
-        $numTeams++ if $key eq 'evalPts';
     }
 }
 
@@ -99,6 +106,7 @@ foreach my $file (@filesOpp) {
 for (my $i = 0; $i < scalar @wpc; $i++) {
     print NBA @{$fgp{'nodes'}}[$i] . ' ' . @{$drb{'nodes'}}[$i] . ' ' . @{$tov{'nodes'}}[$i] . "\n" if $case == 1;
     print NBA @{$pts{'nodes'}}[$i] . ' ' . @{$drb{'nodes'}}[$i] . ' ' . @{$pto{'nodes'}}[$i] . "\n" if $case == 2;
+    print NBA @{$pts{'nodes'}}[$i] . ' ' . @{$pto{'nodes'}}[$i] . "\n" if $case == 3;
 }
 close NBA;
 
@@ -114,6 +122,7 @@ close NBA;
 for (my $i = 0; $i < $numTeams; $i++) {
     print NBA @{$fgp{'evalPts'}}[$i] . ' ' . @{$drb{'evalPts'}}[$i] . ' ' . @{$tov{'evalPts'}}[$i] . "\n" if $case == 1;
     print NBA @{$pts{'evalPts'}}[$i] . ' ' . @{$drb{'evalPts'}}[$i] . ' ' . @{$pto{'evalPts'}}[$i] . "\n" if $case == 2;
+    print NBA @{$pts{'evalPts'}}[$i] . ' ' . @{$pto{'evalPts'}}[$i] . "\n" if $case == 3;
 }
 close NBA;
 
