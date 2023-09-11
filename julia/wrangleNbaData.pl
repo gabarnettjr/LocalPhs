@@ -63,7 +63,6 @@ foreach my $file (@files) {
                 push @{$drb{$key}}, $line[16];
             } elsif ($case == 3) {
                 push @{$pts{$key}}, $line[5];
-                push @{$drb{$key}}, $line[16];
             }
             push @wpc, $line[3] if $key eq 'nodes';
         }
