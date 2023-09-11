@@ -82,7 +82,7 @@ foreach my $file (@filesOpp) {
     my @nba = <NBA>;  close NBA;
     foreach my $line (@nba) {
         my @line = split /\s+/, $line;
-        while ($line[0] =~ /D+/) {
+        while ($line[0] =~ /\D+/) {
             shift @line;
         }
         my $key = 'nodes';
