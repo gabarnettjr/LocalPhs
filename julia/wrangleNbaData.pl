@@ -13,10 +13,10 @@ my $case = 2;
 # Get the columns you are interested in from the raw NBA stat data.
 
 (opendir FOL, "nbaTeamData") || die "Failed to open directory.";
-my @files = readdir FOL;  close FOL;
+my @files = readdir FOL;  closedir FOL;
 
-(opendir FOLOPP, "nbaTeamDataOpp") || die "Failed to open directory.";
-my @filesOpp = readdir FOLOPP;  close FOLOPP;
+(opendir FOL, "nbaTeamDataOpp") || die "Failed to open directory.";
+my @filesOpp = readdir FOL;  closedir FOL;
 
 my @wpc = ();
 
