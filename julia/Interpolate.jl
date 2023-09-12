@@ -14,7 +14,7 @@ include("LocalPhs.jl")
 
 rbfExponent = 1                  # odd number exponent to use in the phs rbf (3)
 polyDegree = 0                      # maximum polynomial degree in the basis (1)
-stencilRadius = 1.0             # how far away to look (initially) for neighbors
+stencilRadius = 1/16            # how far away to look (initially) for neighbors
 debug = false
 
 pathToNodes     = ARGS[1]
@@ -49,6 +49,7 @@ println("numNodes = $numNodes")
 # Count the number of evaluation points.
 numEvalPts = length(evalPts)
 println("numEvalPts = $numEvalPts")
+
 
 ################################################################################
 
@@ -97,16 +98,34 @@ if debug;  print("\n");  end
 
 ################################################################################
 
-# Take care of nodes that are too close to each other.
+# Get the mean of the data in each dimension.
+means = sum(nodesMatrix, dims=1) ./ numNodes
+
+# Get the standard deviation of the data in each dimension.
+stds = sqrt.(sum((nodesMatrix .- repeat(means, numNodes, 1)) .^2, dims=1))
+
+# Scale the nodes so each dimension has mean 0 and std 1.
+# Also scale the evalPts in the same way so they can be used.
+nodesMatrix = (nodesMatrix .- repeat(means, numNodes, 1)) ./ repeat(stds, numNodes, 1)
+evalPtsMatrix = (evalPtsMatrix .- repeat(means, numEvalPts, 1)) ./ repeat(stds, numEvalPts, 1)
+
+################################################################################
+
+# Take care of nodes that are too close to each other (basically the same).
 
 for i = numNodes : -1 : 2
     for j = 1 : i - 1
-        if (norm(nodesMatrix[i, :] - nodesMatrix[j, :]) < .09)
+        if (norm(nodesMatrix[i, :] - nodesMatrix[j, :]) < .00001)
             println("Averaging nodes $i (", nodesMatrix[i,:], ", ", valuesMatrix[i,1], ") and $j (", nodesMatrix[j,:], ", ", valuesMatrix[j,1], ").")
             global nodesMatrix[j, :]  = (nodesMatrix[j, :]  + nodesMatrix[i, :])  / 2
             global valuesMatrix[j, :] = (valuesMatrix[j, :] + valuesMatrix[i, :]) / 2
-            global nodesMatrix  = vcat( nodesMatrix[1:i-1, :], nodesMatrix[i+1:end, :] )
-            global valuesMatrix = vcat(valuesMatrix[1:i-1, :], valuesMatrix[i+1:end, :])
+            if (i == size(nodesMatrix, 1))
+                global nodesMatrix  = nodesMatrix[1:i-1, :]
+                global valuesMatrix = valuesMatrix[1:i-1, :]
+            else
+                global nodesMatrix  = vcat( nodesMatrix[1:i-1, :], nodesMatrix[i+1:end, :] )
+                global valuesMatrix = vcat(valuesMatrix[1:i-1, :], valuesMatrix[i+1:end, :])
+            end
         end
     end
 end
