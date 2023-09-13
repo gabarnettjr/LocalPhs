@@ -50,7 +50,7 @@ if ($case == 1) {
 
 foreach my $file (@files) {
     next if $file eq '.' || $file eq '..';
-    (open NBA, "<nbaTeamData/$file") || die "Failed to open file for reading.";
+    (open NBA, "<nbaTeamData/$file") || die "Failed to open nbaTeamData/$file for reading.";
     my @nba = <NBA>;  close NBA;
     foreach my $line (@nba) {
         if ($line =~ /^\d+\s+/) {
@@ -87,7 +87,7 @@ my $numTeams = 0;
 
 foreach my $file (@filesOpp) {
     next if $file eq '.' || $file eq '..';
-    (open NBA, "<nbaTeamDataOpp/$file") || die "Failed to open file for reading.";
+    (open NBA, "<nbaTeamDataOpp/$file") || die "Failed to open nbaTeamDataOpp/$file for reading.";
     my @nba = <NBA>;  close NBA;
     foreach my $line (@nba) {
         if ($line =~ /\S+/) {
