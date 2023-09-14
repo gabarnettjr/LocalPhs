@@ -46,16 +46,25 @@ function Phs_coeffs(self::Phs)
         return self.coeffs
     end
     
-    # Make the combined RBF plus polynomial A-matrix.
-    A = Phs_phi(self, self.nodes)
-    p = Phs_poly(self, self.nodes)
-    A = hcat(A, p)
-    null = zeros(size(p, 2), size(p, 2))
-    A = vcat(A, transpose(vcat(p, null)))
+    if (self.rbfExponent == 0)
+        # Just use polynomial least squares.
+        A = Phs_poly(self, self.nodes)
+
+        # Solve a LEAST SQUARES problem to get the coefficients.
+        self.coeffs = A \ self.vals
+    else
+        # Make the combined RBF plus polynomial A-matrix.
+        A = Phs_phi(self, self.nodes)
+        p = Phs_poly(self, self.nodes)
+        A = hcat(A, p)
+        null = zeros(size(p, 2), size(p, 2))
+        A = vcat(A, transpose(vcat(p, null)))
+
+        # Solve a SQUARE linear system to get the coefficients.
+        null = zeros(size(p, 2), 1)
+        self.coeffs = A \ vcat(self.vals, null)
+    end
     
-    # Solve a linear system to get the coefficients.
-    null = zeros(size(p, 2), 1)
-    self.coeffs = A \ vcat(self.vals, null)
     return self.coeffs
 end
 
@@ -77,9 +86,15 @@ end
 ################################################################################
 
 function Phs_evaluate(self::Phs, evalPts::Matrix{Float64})
-    # Evaluate the Phs at the evalPts.
+    # Evaluate the approximation at the evalPts.
     
-    out = hcat(Phs_phi(self, evalPts), Phs_poly(self, evalPts)) * Phs_coeffs(self)
+    if (self.rbfExponent == 0)
+        out = Phs_poly(self, evalPts) * Phs_coeffs(self)
+    elseif (self.rbfExponent == 1 || self.rbfExponent == 3)
+        out = hcat(Phs_phi(self, evalPts), Phs_poly(self, evalPts)) * Phs_coeffs(self)
+    else
+        error("Only exponents of 0, 1, and 3 are supported for the RBF.")
+    end
     
     return out
 end
