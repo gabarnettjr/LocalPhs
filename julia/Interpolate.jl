@@ -12,8 +12,8 @@ include("LocalPhs.jl")
 
 ################################################################################
 
-rbfExponent = 0                  # odd number exponent to use in the phs rbf (3)
-polyDegree = 1                      # maximum polynomial degree in the basis (1)
+rbfExponent = 1                  # odd number exponent to use in the phs rbf (3)
+polyDegree = 0                      # maximum polynomial degree in the basis (1)
 stencilRadius = 1/32            # how far away to look (initially) for neighbors
 debug = false
 
