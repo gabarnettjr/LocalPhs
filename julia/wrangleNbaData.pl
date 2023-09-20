@@ -8,7 +8,7 @@ use warnings;
 # case 1: field goal pct, defensive rebounds, turnovers.
 # case 2: points, defensive rebounds, opponent points.
 # case 3: points, opponent points.
-my $case = 2;
+my $case = $ARGV[0];
 
 # Get the columns you are interested in from the raw NBA stat data.
 
