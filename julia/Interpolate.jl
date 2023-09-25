@@ -102,7 +102,7 @@ if debug;  print("\n");  end
 means = sum(nodesMatrix, dims=1) ./ numNodes
 
 # Get the standard deviation of the data in each dimension.
-stds = sqrt.(sum((nodesMatrix .- repeat(means, numNodes, 1)) .^2, dims=1))
+stds = sqrt.(sum((nodesMatrix .- repeat(means, numNodes, 1)) .^ 2, dims=1) ./ (numNodes - 1))
 
 # Scale the nodes so each dimension has mean 0 and std 1.
 # Also scale the evalPts in the same way so they can be used.
