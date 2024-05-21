@@ -220,7 +220,7 @@ sub new
         }
         else
         {
-            $$self{'tol'} = 1e-8;
+            $$self{'tol'} = 1e-8;                                      # DEFAULT
         }
         
         foreach my $row (@{$$self{'items'}})
