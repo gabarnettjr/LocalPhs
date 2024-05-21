@@ -77,6 +77,19 @@ sub test_linspace
 
 
 
+sub test_round
+{
+    my $A = Matrix::rand(3, 7);
+    print "test_round_\$A = \n";
+    $A->disp;
+    
+    my $B = $A->round(2);
+    print "test_round_\$B = \n";
+    $B->disp;
+}
+
+
+
 sub test_rows_cols
 {
     my $A = Matrix::rand(5, 3);
@@ -174,6 +187,7 @@ sub test_ALL
     test_alloc_set;
     test_zeros_ones_eye;
     test_linspace;
+    test_round;
     test_rows_cols;
     test_meshgrid;
     test_vstack;
@@ -194,12 +208,20 @@ sub new
     my $self = \%self;
     bless $self;
     
-    if (scalar @_ == 1 && ref $_[0] && ref @{$_[0]}[0])
+    if ((scalar @_ == 1 || scalar @_ == 2) && ref $_[0] && ref @{$_[0]}[0])
     {
         $$self{'type'}    = 'Matrix';
         $$self{'items'}   = shift;
         $$self{'numRows'} = scalar @{$$self{'items'}};
         $$self{'numCols'} = scalar @{@{$$self{'items'}}[0]};
+        if (scalar @_)
+        {
+            $$self{'tol'} = shift;
+        }
+        else
+        {
+            $$self{'tol'} = 1e-8;
+        }
         
         foreach my $row (@{$$self{'items'}})
         {
@@ -336,8 +358,16 @@ sub eye
 sub linspace
 {
     # New 1D matrix of equally-spaced values with known start and finish.
-    die "Matrix::linspace() requires three inputs: start, finish, and number of points.    " if scalar @_ != 3;
+    if (scalar @_ != 3)
+    {
+        print STDERR "\nMatrix::linspace() requires three inputs: start, finish, and number of points.\n";  die;
+    }
     my ($a, $b, $numCols) = @_;
+    my $tmp = Matrix::new([[$numCols]]);
+    if ($numCols <= 0 || ! $tmp->round(0)->equals($tmp))
+    {
+        print STDERR "\nLast input must be a positive whole number (number of points in array).\n";  die;
+    }
     
     my $dx = ($b - $a) / ($numCols - 1);
     my $item = $a;
@@ -351,6 +381,61 @@ sub linspace
     my $items = [\@items];
     
     return Matrix::new($items);
+}
+
+
+
+sub round {
+    # Round the entries in a matrix to the specified number of places.
+    my $self = shift;
+    if (scalar @_ != 1)
+    {
+        print STDERR "\nOne input is required (number of places to round to).\n";  die;
+    }
+    my $places = shift;
+    
+    my $out = Matrix::alloc($self->numRows, $self->numCols);
+    
+    for (my $i = 0; $i < $out->numRows; $i++) {
+        for (my $j = 0; $j < $out->numCols; $j++)
+        {
+            $out->set($i, $j, int (($self->item($i, $j) * 10**$places + .5)) / 10**$places) if $self->item($i, $j) >= 0;
+            $out->set($i, $j, int (($self->item($i, $j) * 10**$places - .5)) / 10**$places) if $self->item($i, $j) <= 0;
+        }
+    }
+    
+    return $out;
+}
+
+
+
+sub equals
+{
+    my $self = shift;
+    if (scalar @_ != 1)
+    {
+        print STDERR "\nExactly one input is required (other matrix).\n";  die;
+    }
+    my $other = shift;
+    if ($self->numRows != $other->numRows || $self->numCols != $other->numCols)
+    {
+        print STDERR "\nTwo matrices must be same size to check if equal.\n";  die;
+    }
+    
+    for (my $i = 0; $i < $self->numRows; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            my $absDiff = abs ($self->item($i, $j) - $other->item($i, $j));
+            
+            if ($absDiff > $self->tol || $absDiff > $other->tol)
+            {
+                return 0;
+            }
+        }
+    }
+    
+    return 1;
 }
 
 ################################################################################
@@ -389,11 +474,27 @@ sub numCols
 
 
 
+sub tol
+{
+    my $self = shift;
+    return $$self{'tol'};
+}
+
+
+
 sub rows
 {
     # Get the rows described in the ref to array $ind.
     my $self = shift;
     my $ind = shift;
+    
+    foreach my $i (@{$ind})
+    {
+        if ($i >= $self->numRows)
+        {
+            print STDERR "\nOne or more requested row index is out of range.\n";  die;
+        }
+    }
     
     my $out = Matrix::alloc(scalar @{$ind}, $self->numCols);
     
@@ -416,6 +517,14 @@ sub cols
     my $self = shift;
     my $ind = shift;
     
+    foreach my $j (@{$ind})
+    {
+        if ($j >= $self->numCols)
+        {
+            print STDERR "\nOne or more requested column index is out of range.\n";  die;
+        }
+    }
+    
     my $out = Matrix::alloc($self->numRows, scalar @{$ind});
     
     for (my $i = 0; $i < $out->numRows;  $i++)
@@ -436,7 +545,7 @@ sub len
     my $self = shift;
     return $self->numRows if $self->numCols == 1;
     return $self->numCols if $self->numRows == 1;
-    die "Length is only well-defined for a 1D matrix.    ";
+    print STDERR "\nLength is only well-defined for a 1D matrix.\n";  die;
 }
 
 
@@ -468,7 +577,10 @@ sub vstack
     my $self = shift;
     my $other = shift;
     
-    die "Dimension mismatch.    " if $self->numCols != $other->numCols;
+    if ($self->numCols != $other->numCols)
+    {
+        print STDERR "\nDimension mismatch.\n";  die;
+    }
     
     my $out = Matrix::alloc($self->numRows + $other->numRows, $other->numCols);
     
@@ -558,16 +670,34 @@ sub item
     {
         $i = shift;
         $j = shift;
+        
+        if ($i >= $self->numRows || $j >= $self->numCols)
+        {
+            print STDERR "\nRow or column index out of range.\n";  die;
+        }
+        
         return @{@{$self->items}[$i]}[$j];
     }
     elsif (scalar @_ == 1 && $self->numRows == 1)
     {
         $j = shift;
+        
+        if ($j >= $self->numCols)
+        {
+            print STDERR "\nColumn index out of range.\n";  die;
+        }
+        
         return @{@{$self->items}[0]}[$j];
     }
     elsif (scalar @_ == 1 && $self->numCols == 1)
     {
         $i = shift;
+        
+        if ($i >= $self->numRows)
+        {
+            print STDERR "\nRow index out of range.\n";  die;
+        }
+        
         return @{@{$self->items}[$i]}[0];
     }
 }
@@ -577,7 +707,10 @@ sub item
 sub row
 {
     my $self = shift;
-    die "Exactly one input is required.    " if scalar @_ != 1;
+    if (scalar @_ != 1)
+    {
+        print STDERR "\nExactly one input is required.\n";  die;
+    }
     my $i = shift;
     
     return Matrix::new([@{$self->items}[$i]]);
@@ -588,7 +721,10 @@ sub row
 sub col
 {
     my $self = shift;
-    die "Exactly one input is required.    " if scalar @_ != 1;
+    if (scalar @_ != 1)
+    {
+        print STDERR "\nExactly one input is required.\n";  die;
+    }
     my $j = shift;
 
     return $self->transpose->row($j)->transpose;
@@ -605,18 +741,36 @@ sub set
     {
         $i = shift;
         $j = shift;
+        
+        if ($i >= $self->numRows || $j > $self->numCols)
+        {
+            print STDERR "\nRow or column index out of range.\n";  die;
+        }
+        
         $val = shift;
         @{@{$self->items}[$i]}[$j] = $val;
     }
     elsif (scalar @_ == 2 && $self->numRows == 1)
     {
         $j = shift;
+        
+        if ($j > $self->numCols)
+        {
+            print STDERR "\nColumn index out of range.\n";  die;
+        }
+        
         $val = shift;
         @{@{$self->items}[0]}[$j] = $val;
     }
     elsif (scalar @_ == 2 && $self->numCols == 1)
     {
         $i = shift;
+        
+        if ($i >= $self->numRows)
+        {
+            print STDERR "\nRow index out of range.\n";  die;
+        }
+        
         $val = shift;
         @{@{$self->items}[$i]}[0] = $val;
     }
@@ -635,6 +789,14 @@ sub setRows
     my $ind = shift;
     my $vals = shift;
     
+    foreach my $i (@{$ind})
+    {
+        if ($i >= $self->numRows)
+        {
+            print STDERR "\nAttempt to access row index that is out of range.\n";  die;
+        }
+    }
+    
     for (my $i = 0; $i < scalar @{$ind}; $i++)
     {
         for (my $j = 0; $j < $self->numCols; $j++)
@@ -652,6 +814,14 @@ sub setCols
     my $self = shift;
     my $ind = shift;
     my $vals = shift;
+    
+    foreach my $j (@{$ind})
+    {
+        if ($j >= $self->numCols)
+        {
+            print STDERR "\nAttempt to access column index that is out of range.\n";  die;
+        }
+    }
     
     for (my $j = 0; $j < scalar @{$ind}; $j++)
     {
