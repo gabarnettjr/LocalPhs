@@ -15,6 +15,15 @@ use warnings;
 
 # /mu/bin/perl -e 'use lib "/home/gregorybarne/tmpCode"; use Matrix; Matrix::test_ALL;'
 
+sub test_new
+{
+    my $A = Matrix::new([[1,2,3], [4,5,6], [7,8,9]]);
+    print "test_new_\$A = \n";
+    $A->disp;
+}
+
+
+
 sub test_rand
 {
     my $A = Matrix::rand(3, 4);
@@ -68,6 +77,23 @@ sub test_linspace
 
 
 
+sub test_rows_cols
+{
+    my $A = Matrix::rand(5, 3);
+    print "test_rows_cols_\$A = \n";
+    $A->disp;
+    
+    my $B = $A->rows([1,4]);
+    print "test_rows_cols_\$B = \n";
+    $B->disp;
+    
+    my $C = $A->cols([0,2]);
+    print "test_rows_cols_\$C = \n";
+    $C->disp;
+}
+
+
+
 sub test_meshgrid
 {
     my $x = Matrix::linspace(-3, 3, 7);
@@ -85,13 +111,50 @@ sub test_meshgrid
 
 
 
+sub test_vstack
+{
+    my $a = Matrix::rand(3, 2);
+    my $b = Matrix::ones(4, 2);
+    my $c = $a->vstack($b);
+    print "test_vstack_\$c = \n";
+    $c->disp;
+}
+
+
+
+sub test_hstack
+{
+    my $a = Matrix::rand(2, 3);
+    my $b = Matrix::ones(2, 4);
+    my $c = $a->hstack($b);
+    print "test_hstack_\$c = \n";
+    $c->disp;
+}
+
+
+
+sub test_flatten
+{
+    my $a = Matrix::rand(3, 5);
+    my $b = $a->flatten;
+    print "test_flatten_\$b = \n";
+    $b->disp;
+}
+
+
+
 sub test_ALL
 {
+    test_new;
     test_rand;
     test_alloc_set;
     test_zeros_ones_eye;
     test_linspace;
+    test_rows_cols;
     test_meshgrid;
+    test_vstack;
+    test_hstack;
+    test_flatten;
 }
 
 ################################################################################
@@ -296,6 +359,48 @@ sub numCols
 {
     my $self = shift;
     return $$self{'numCols'};
+}
+
+
+
+sub rows
+{
+    # Get the rows described in the ref to array $ind.
+    my $self = shift;
+    my $ind = shift;
+    
+    my $out = Matrix::alloc(scalar @{$ind}, $self->numCols);
+    
+    for (my $i = 0; $i < $out->numRows;  $i++)
+    {
+        for (my $j = 0; $j < $out->numCols; $j++)
+        {
+            $out->set($i, $j, $self->item(@{$ind}[$i], $j));
+        }
+    }
+    
+    return $out;
+}
+
+
+
+sub cols
+{
+    # Get the columns described in the ref to array $ind.
+    my $self = shift;
+    my $ind = shift;
+    
+    my $out = Matrix::alloc($self->numRows, scalar @{$ind});
+    
+    for (my $i = 0; $i < $out->numRows;  $i++)
+    {
+        for (my $j = 0; $j < $out->numCols; $j++)
+        {
+            $out->set($i, $j, $self->item($i, @{$ind}[$j]));
+        }
+    }
+    
+    return $out;
 }
 
 ################################################################################
