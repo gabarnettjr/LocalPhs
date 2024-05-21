@@ -26,7 +26,7 @@ sub test_new
 
 sub test_rand
 {
-    my $A = Matrix::rand(3, 4);
+    my $A = Matrix::rand(2, 3);
     print "test_rand_\$A = \n";
     $A->disp;
 }
@@ -227,13 +227,13 @@ sub new
         {
             if (scalar @{$row} != $$self{'numCols'})
             {
-                die "Each row should have the same number of elements.    ";
+                print "\nEach row should have the same number of elements.\n";  die;
             }
         }
     }
     else
     {
-        die "Bad input for new matrix.  Give ref to array of refs to arrays.    ";
+        print "\nBad input for new matrix.  Give ref to array of refs to arrays.\n";  die;
     }
     
     return $self;
@@ -245,7 +245,10 @@ sub alloc
 {
     # Allocate memory to fill in the items of a new matrix.
     # If all items will be filled, then this is faster than using zeros().
-    die "Matrix::alloc() requires two inputs: numRows and numCols.    " if scalar @_ != 2;
+    if (scalar @_ != 2)
+    {
+        print "\nMatrix::alloc() requires two inputs: numRows and numCols.\n";  die;
+    }
     my ($numRows, $numCols) = @_;
     
     my @items;
@@ -266,7 +269,10 @@ sub alloc
 sub zeros
 {
     # New matrix of zeros.
-    die "Matrix::zeros() requires two inputs: numRows and numCols.    " if scalar @_ != 2;
+    if (scalar @_ != 2)
+    {
+        print "\nMatrix::zeros() requires two inputs: numRows and numCols.\n";  die;
+    }
     my ($numRows, $numCols) = @_;
     
     my @items = ();
@@ -285,7 +291,10 @@ sub zeros
 sub ones
 {
     # New matrix of ones.
-    die "Matrix::ones() requires two inputs: numRows and numCols.    " if scalar @_ != 2;
+    if (scalar @_ != 2)
+    {
+        print "\nMatrix::ones() requires two inputs: numRows and numCols.\n";  die;
+    }
     my ($numRows, $numCols) = @_;
     
     my @items = ();
@@ -304,7 +313,10 @@ sub ones
 sub rand
 {
     # New matrix whose values are randomly chosen from between 0 and 1.
-    die "Matrix::rand() requires two inputs: numRows and numCols.    " if scalar @_ != 2;
+    if (scalar @_ != 2)
+    {
+        print "\nMatrix::rand() requires two inputs: numRows and numCols.\n";  die;
+    }
     my ($numRows, $numCols) = @_;
     
     my @items = ();
@@ -327,7 +339,10 @@ sub rand
 sub eye
 {
     # New Identity matrix.
-    die "Matrix::eye() requires one input: numRows (numCols always equals numRows).    " if scalar @_ != 1;
+    if (scalar @_ != 1)
+    {
+        print "\nMatrix::eye() requires one input: numRows (numCols always equals numRows).\n";  die;
+    }
     my ($numRows) = @_;
 
     my $numCols = $numRows;
@@ -360,13 +375,13 @@ sub linspace
     # New 1D matrix of equally-spaced values with known start and finish.
     if (scalar @_ != 3)
     {
-        print STDERR "\nMatrix::linspace() requires three inputs: start, finish, and number of points.\n";  die;
+        print "\nMatrix::linspace() requires three inputs: start, finish, and number of points.\n";  die;
     }
     my ($a, $b, $numCols) = @_;
     my $tmp = Matrix::new([[$numCols]]);
     if ($numCols <= 0 || ! $tmp->round(0)->equals($tmp))
     {
-        print STDERR "\nLast input must be a positive whole number (number of points in array).\n";  die;
+        print "\nLast input must be a positive whole number (number of points in array).\n";  die;
     }
     
     my $dx = ($b - $a) / ($numCols - 1);
@@ -378,9 +393,8 @@ sub linspace
         $item += $dx;
     }
     my $numRows = 1;
-    my $items = [\@items];
     
-    return Matrix::new($items);
+    return Matrix::new([\@items]);
 }
 
 
@@ -390,7 +404,7 @@ sub round {
     my $self = shift;
     if (scalar @_ != 1)
     {
-        print STDERR "\nOne input is required (number of places to round to).\n";  die;
+        print "\nOne input is required (number of places to round to).\n";  die;
     }
     my $places = shift;
     
@@ -414,12 +428,12 @@ sub equals
     my $self = shift;
     if (scalar @_ != 1)
     {
-        print STDERR "\nExactly one input is required (other matrix).\n";  die;
+        print "\nExactly one input is required (other matrix).\n";  die;
     }
     my $other = shift;
     if ($self->numRows != $other->numRows || $self->numCols != $other->numCols)
     {
-        print STDERR "\nTwo matrices must be same size to check if equal.\n";  die;
+        print "\nTwo matrices must be same size to check if equal.\n";  die;
     }
     
     for (my $i = 0; $i < $self->numRows; $i++)
@@ -492,7 +506,7 @@ sub rows
     {
         if ($i >= $self->numRows)
         {
-            print STDERR "\nOne or more requested row index is out of range.\n";  die;
+            print "\nOne or more requested row index is out of range.\n";  die;
         }
     }
     
@@ -521,7 +535,7 @@ sub cols
     {
         if ($j >= $self->numCols)
         {
-            print STDERR "\nOne or more requested column index is out of range.\n";  die;
+            print "\nOne or more requested column index is out of range.\n";  die;
         }
     }
     
@@ -545,7 +559,7 @@ sub len
     my $self = shift;
     return $self->numRows if $self->numCols == 1;
     return $self->numCols if $self->numRows == 1;
-    print STDERR "\nLength is only well-defined for a 1D matrix.\n";  die;
+    print "\nLength is only well-defined for a 1D matrix.\n";  die;
 }
 
 
@@ -579,7 +593,7 @@ sub vstack
     
     if ($self->numCols != $other->numCols)
     {
-        print STDERR "\nDimension mismatch.\n";  die;
+        print "\nDimension mismatch.\n";  die;
     }
     
     my $out = Matrix::alloc($self->numRows + $other->numRows, $other->numCols);
@@ -610,12 +624,7 @@ sub hstack
     my $self = shift;
     my $other = shift;
     
-    my $out;
-    eval
-    {
-        $out = $self->transpose->vstack($other->transpose);
-    };
-    die if $@;
+    my $out = $self->transpose->vstack($other->transpose);
     
     return $out->transpose;
 }
@@ -673,7 +682,7 @@ sub item
         
         if ($i >= $self->numRows || $j >= $self->numCols)
         {
-            print STDERR "\nRow or column index out of range.\n";  die;
+            print "\nRow or column index out of range.\n";  die;
         }
         
         return @{@{$self->items}[$i]}[$j];
@@ -684,7 +693,7 @@ sub item
         
         if ($j >= $self->numCols)
         {
-            print STDERR "\nColumn index out of range.\n";  die;
+            print "\nColumn index out of range.\n";  die;
         }
         
         return @{@{$self->items}[0]}[$j];
@@ -695,7 +704,7 @@ sub item
         
         if ($i >= $self->numRows)
         {
-            print STDERR "\nRow index out of range.\n";  die;
+            print "\nRow index out of range.\n";  die;
         }
         
         return @{@{$self->items}[$i]}[0];
@@ -709,7 +718,7 @@ sub row
     my $self = shift;
     if (scalar @_ != 1)
     {
-        print STDERR "\nExactly one input is required.\n";  die;
+        print "\nExactly one input is required.\n";  die;
     }
     my $i = shift;
     
@@ -723,7 +732,7 @@ sub col
     my $self = shift;
     if (scalar @_ != 1)
     {
-        print STDERR "\nExactly one input is required.\n";  die;
+        print "\nExactly one input is required.\n";  die;
     }
     my $j = shift;
 
@@ -744,7 +753,7 @@ sub set
         
         if ($i >= $self->numRows || $j > $self->numCols)
         {
-            print STDERR "\nRow or column index out of range.\n";  die;
+            print "\nRow or column index out of range.\n";  die;
         }
         
         $val = shift;
@@ -756,7 +765,7 @@ sub set
         
         if ($j > $self->numCols)
         {
-            print STDERR "\nColumn index out of range.\n";  die;
+            print "\nColumn index out of range.\n";  die;
         }
         
         $val = shift;
@@ -768,7 +777,7 @@ sub set
         
         if ($i >= $self->numRows)
         {
-            print STDERR "\nRow index out of range.\n";  die;
+            print "\nRow index out of range.\n";  die;
         }
         
         $val = shift;
@@ -776,7 +785,7 @@ sub set
     }
     else
     {
-        print STDERR "\nInputs not understood.\n";  die;
+        print "\nInputs not understood.\n";  die;
     }
 }
 
@@ -793,7 +802,7 @@ sub setRows
     {
         if ($i >= $self->numRows)
         {
-            print STDERR "\nAttempt to access row index that is out of range.\n";  die;
+            print "\nAttempt to access row index that is out of range.\n";  die;
         }
     }
     
@@ -819,7 +828,7 @@ sub setCols
     {
         if ($j >= $self->numCols)
         {
-            print STDERR "\nAttempt to access column index that is out of range.\n";  die;
+            print "\nAttempt to access column index that is out of range.\n";  die;
         }
     }
     
@@ -863,7 +872,7 @@ sub plus
     my $numCols = $self->numCols;
     
     if (ref $other && ($numRows != $other->numRows || $numCols != $other->numCols)) {
-        print STDERR "\nMatrices must be the same size to add them together.\n";  die;
+        print "\nMatrices must be the same size to add them together.\n";  die;
     }
     
     my $sum = Matrix::alloc($numRows, $numCols);
@@ -906,7 +915,7 @@ sub dotProduct
 
     if (! ref $other)
     {
-        print STDERR "\nInput must be a 1D matrix.\n";  die;
+        print "\nInput must be a 1D matrix.\n";  die;
     }
     
     my $numRows = $self->numRows;
@@ -916,11 +925,11 @@ sub dotProduct
     
     if ($numRows != $other->numRows || $numCols != $other->numCols)
     {
-        print STDERR "\nMatrices must be the same size to dot them.\n";  die;
+        print "\nMatrices must be the same size to dot them.\n";  die;
     }
     elsif ($numRows != 1 && $numCols != 1)
     {
-        print STDERR "\nThis function is only implemented for 1D matrices.\n";  die;
+        print "\nThis function is only implemented for 1D matrices.\n";  die;
     }
     elsif ($numRows == 1)
     {
@@ -1019,11 +1028,11 @@ sub dotTimes
     
     if (! ref $other)
     {
-        print STDERR "\nUse dot() to multiply a scalar by a matrix.\n";  die;
+        print "\nUse dot() to multiply a scalar by a matrix.\n";  die;
     }
     elsif ($numRows != $other->numRows || $numCols != $other->numCols)
     {
-        print STDERR "\nMatrices must be the same size to (dot) multiply them together.\n";  die;
+        print "\nMatrices must be the same size to (dot) multiply them together.\n";  die;
     }
     
     my $prod = Matrix::alloc($numRows, $numCols);
@@ -1109,7 +1118,7 @@ sub solve
     if ($A->numRows != $A->numCols || $A->numRows != $b->numRows) {
         print "Rows(A) = " . $A->numRows . "\n";
         print "Rows(b) = " . $b->numRows . "\n";
-        print STDERR "\nA should be square.  Rows(A) should equal Rows(b).\n";  die;
+        print "\nA should be square.  Rows(A) should equal Rows(b).\n";  die;
     }
     
     my $nRows = $A->numRows;
