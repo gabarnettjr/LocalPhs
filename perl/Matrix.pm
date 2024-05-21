@@ -143,6 +143,30 @@ sub test_flatten
 
 
 
+sub test_setRows
+{
+    my $A = Matrix::zeros(5, 5);
+    print "test_setRows_\$A = \n";
+    $A->disp;
+    $A->setRows([0,4], Matrix::ones(2, 5));
+    print "test_setRows_\$A = \n";
+    $A->disp;
+}
+
+
+
+sub test_setCols
+{
+    my $A = Matrix::zeros(5, 5);
+    print "test_setCols_\$A = \n";
+    $A->disp;
+    $A->setCols([0,4], Matrix::ones(5, 2));
+    print "test_setCols_\$A = \n";
+    $A->disp;
+}
+
+
+
 sub test_ALL
 {
     test_new;
@@ -155,6 +179,8 @@ sub test_ALL
     test_vstack;
     test_hstack;
     test_flatten;
+    test_setRows;
+    test_setCols;
 }
 
 ################################################################################
@@ -597,6 +623,42 @@ sub set
     else
     {
         print STDERR "\nInputs not understood.\n";  die;
+    }
+}
+
+
+
+sub setRows
+{
+    # Set certain rows of an existing matrix equal to new values.
+    my $self = shift;
+    my $ind = shift;
+    my $vals = shift;
+    
+    for (my $i = 0; $i < scalar @{$ind}; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            $self->set(@{$ind}[$i], $j, $vals->item($i, $j));
+        }
+    }
+}
+
+
+
+sub setCols
+{
+    # Set certain columns of an existing matrix equal to new values.
+    my $self = shift;
+    my $ind = shift;
+    my $vals = shift;
+    
+    for (my $j = 0; $j < scalar @{$ind}; $j++)
+    {
+        for (my $i = 0; $i < $self->numRows; $i++)
+        {
+            $self->set($i, @{$ind}[$j], $vals->item($i, $j));
+        }
     }
 }
 
