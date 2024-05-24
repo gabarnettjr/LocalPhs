@@ -9,6 +9,8 @@ package Matrix;
 use strict;
 use warnings;
 
+use constant PI => 3.141592653589793;
+
 ################################################################################
 
 # TESTS
@@ -433,7 +435,7 @@ sub equals
     my $other = shift;
     if ($self->numRows != $other->numRows || $self->numCols != $other->numCols)
     {
-        print "\nTwo matrices must be same size to check if equal.\n";  die;
+        print "\nTwo matrices must be same size to check if they are equal.\n";  die;
     }
     
     for (my $i = 0; $i < $self->numRows; $i++)
@@ -588,6 +590,7 @@ sub meshgrid
 
 sub vstack
 {
+    # Stack two matrices vertically.
     my $self = shift;
     my $other = shift;
     
@@ -621,18 +624,18 @@ sub vstack
 
 sub hstack
 {
+    # Stack to matrices horizontally.
     my $self = shift;
     my $other = shift;
     
-    my $out = $self->transpose->vstack($other->transpose);
-    
-    return $out->transpose;
+    return $self->transpose->vstack($other->transpose)->transpose;
 }
 
 
 
 sub flatten
 {
+    # Turn the matrix into one long row by placing rows next to each other.
     my $self = shift;
     
     my $out = Matrix::alloc(1, $self->numRows * $self->numCols);
@@ -654,6 +657,7 @@ sub flatten
 
 sub disp
 {
+    # Display the contents of a matrix in a readable format.
     my $self = shift;
     
     foreach my $row (@{$self->items})
@@ -672,11 +676,13 @@ sub disp
 
 sub item
 {
+    # Get a single element of a matrix at row $i and column $j.
     my $self = shift;
     my ($i, $j);
     
     if (scalar @_ == 2)
     {
+        # Matrix with rows and columns.
         $i = shift;
         $j = shift;
         
@@ -689,6 +695,7 @@ sub item
     }
     elsif (scalar @_ == 1 && $self->numRows == 1)
     {
+        # Row vector.
         $j = shift;
         
         if ($j >= $self->numCols)
@@ -700,6 +707,7 @@ sub item
     }
     elsif (scalar @_ == 1 && $self->numCols == 1)
     {
+        # Column vector.
         $i = shift;
         
         if ($i >= $self->numRows)
@@ -715,10 +723,11 @@ sub item
 
 sub row
 {
+    # Get one row from a matrix.
     my $self = shift;
     if (scalar @_ != 1)
     {
-        print "\nExactly one input is required.\n";  die;
+        print "\nExactly one input is required (the row index that you want).\n";  die;
     }
     my $i = shift;
     
@@ -729,10 +738,11 @@ sub row
 
 sub col
 {
+    # Get one column from a matrix.
     my $self = shift;
     if (scalar @_ != 1)
     {
-        print "\nExactly one input is required.\n";  die;
+        print "\nExactly one input is required (the column index that you want).\n";  die;
     }
     my $j = shift;
 
@@ -743,11 +753,13 @@ sub col
 
 sub set
 {
+    # Set a single element of a matrix equal to a specified value.
     my $self = shift;    
     my ($i, $j, $val);
     
     if (scalar @_ == 3)
     {
+        # Matrix with multiple rows and columns.
         $i = shift;
         $j = shift;
         
@@ -761,6 +773,7 @@ sub set
     }
     elsif (scalar @_ == 2 && $self->numRows == 1)
     {
+        # Row vector.
         $j = shift;
         
         if ($j > $self->numCols)
@@ -773,6 +786,7 @@ sub set
     }
     elsif (scalar @_ == 2 && $self->numCols == 1)
     {
+        # Column vector.
         $i = shift;
         
         if ($i >= $self->numRows)
@@ -865,6 +879,7 @@ sub copy
 
 sub plus
 {
+    # Add two matrices.
     my $self = shift;
     my $other = shift;
     
@@ -899,6 +914,7 @@ sub plus
 
 sub minus
 {
+    # Subtract two matrices.
     my $self = shift;
     my $other = shift;
 
@@ -953,6 +969,7 @@ sub dotProduct
 
 sub transpose
 {
+    # Transpose a matrix so rows become columns and vice versa.
     my $self = shift;
     
     my $out = Matrix::alloc($self->numCols, $self->numRows);
@@ -1020,6 +1037,7 @@ sub dot
 
 sub dotTimes
 {
+    # Multiply two matrices element-wise.
     my $self = shift;
     my $other = shift;
     
@@ -1052,6 +1070,7 @@ sub dotTimes
 
 sub pow
 {
+    # Raise a matrix to a power element-wise.
     my $self = shift;
     my $pow = shift;
     
@@ -1072,6 +1091,7 @@ sub pow
 
 sub norm
 {
+    # Calculate the norm of a matrix (default is 2-norm).
     my $self = shift;
     die "Only 1D matrices are supported right now.    " if $self->numRows > 1 && $self->numCols > 1;
     my $p = shift;
@@ -1092,10 +1112,92 @@ sub norm
     return $norm ** (1 / $p);
 }
 
+
+
+sub cos
+{
+    my $self = shift;
+    
+    my $out = Matrix::alloc($self->numRows, $self->numCols);
+    
+    for (my $i = 0; $i < $self->numRows; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            $out->set($i, $j, CORE::cos $self->item($i, $j));
+        }
+    }
+    
+    return $out;
+}
+
+
+
+sub sin
+{
+    my $self = shift;
+    
+    my $out = Matrix::alloc($self->numRows, $self->numCols);
+    
+    for (my $i = 0; $i < $self->numRows; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            $out->set($i, $j, CORE::sin $self->item($i, $j));
+        }
+    }
+    
+    return $out;
+}
+
+
+
+sub tan
+{
+    my $self = shift;
+    
+    my $out = Matrix::alloc($self->numRows, $self->numCols);
+    
+    for (my $i = 0; $i < $self->numRows; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            $out->set($i, $j, (CORE::sin $self->item($i, $j)) / (CORE::cos $self->item($i, $j)));
+        }
+    }
+    
+    return $out;
+}
+
+
+
+sub wiggle
+{
+    my $self = shift;
+    if (scalar @_ != 1)
+    {
+        print "\nOne input (max wiggle amount) is required.\n";  die;
+    }
+    if ($self->numRows != 2)
+    {
+        print "\nInput should be a coordinate matrix (two rows).\n";  die;
+    }
+    my $drMax = shift;
+    
+    my $dr  = Matrix::rand(1, $self->numCols)->dot($drMax);
+    my $dth = Matrix::rand(1, $self->numCols)->dot(2 * PI);
+    
+    my $dx = $dr->dotTimes($dth->cos);
+    my $dy = $dr->dotTimes($dth->sin);
+    
+    return $self->copy->plus($dx->vstack($dy));
+}
+
 ################################################################################
 
 sub swapRows
 {
+    # Swap the rows of a matrix.
     my $self = shift;
     my $i = shift;
     my $j = shift;
@@ -1109,6 +1211,7 @@ sub swapRows
 
 sub solve
 {
+    # Solve a linear system Ax = b for x.
     my $self = shift;
     my $rhs = shift;
     
