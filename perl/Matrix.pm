@@ -182,6 +182,30 @@ sub test_setCols
 
 
 
+sub test_spliceRows
+{
+    my $A = Matrix::rand(5, 3);
+    print "test_spliceRows_\$A = \n";
+    $A->disp;
+    $A = $A->spliceRows(1, 3);
+    print "test_spliceRows_\$A = \n";
+    $A->disp;
+}
+
+
+
+sub test_spliceCols
+{
+    my $A = Matrix::rand(3, 7);
+    print "test_spliceCols_\$A = \n";
+    $A->disp;
+    $A = $A->spliceCols(1, 3);
+    print "test_spliceCols_\$A = \n";
+    $A->disp;
+}
+
+
+
 sub test_ALL
 {
     test_new;
@@ -197,6 +221,8 @@ sub test_ALL
     test_flatten;
     test_setRows;
     test_setCols;
+    test_spliceRows;
+    test_spliceCols;
 }
 
 ################################################################################
@@ -477,7 +503,7 @@ sub items
 sub numRows
 {
     my $self = shift;
-    return $$self{'numRows'};
+    return scalar @{$$self{'items'}};
 }
 
 
@@ -485,7 +511,7 @@ sub numRows
 sub numCols
 {
     my $self = shift;
-    return $$self{'numCols'};
+    return scalar @{@{$$self{'items'}}[0]};
 }
 
 
@@ -552,6 +578,30 @@ sub cols
     }
     
     return $out;
+}
+
+
+
+sub spliceRows
+{
+    my $self = shift;
+    my $ind = shift;
+    my $howMany = shift;
+    
+    my $out = $self->copy;
+    splice @{$out->items}, $ind, $howMany;
+    return $out;
+}
+
+
+
+sub spliceCols
+{
+    my $self = shift;
+    my $ind = shift;
+    my $howMany = shift;
+    
+    return $self->transpose->spliceRows($ind, $howMany)->transpose;
 }
 
 ################################################################################
@@ -721,41 +771,22 @@ sub item
 
 
 
-sub row
-{
-    # Get one row from a matrix.
-    my $self = shift;
-    if (scalar @_ != 1)
-    {
-        print "\nExactly one input is required (the row index that you want).\n";  die;
-    }
-    my $i = shift;
-    
-    return Matrix::new([@{$self->items}[$i]]);
-}
-
-
-
-sub col
-{
-    # Get one column from a matrix.
-    my $self = shift;
-    if (scalar @_ != 1)
-    {
-        print "\nExactly one input is required (the column index that you want).\n";  die;
-    }
-    my $j = shift;
-
-    return $self->transpose->row($j)->transpose;
-}
-
-
-
 sub set
 {
     # Set a single element of a matrix equal to a specified value.
     my $self = shift;    
     my ($i, $j, $val);
+    
+    # Undefine min/max info since something in the matrix is changing.
+    if (defined $$self{'min'})
+    {
+        undef $$self{'min'};
+        undef $$self{'iMin'};
+        undef $$self{'jMin'};
+        undef $$self{'max'};
+        undef $$self{'iMax'};
+        undef $$self{'jMax'};
+    }
     
     if (scalar @_ == 3)
     {
@@ -879,14 +910,14 @@ sub copy
 
 sub plus
 {
-    # Add two matrices.
+    # Add two matrices or add a scalar to a matrix.
     my $self = shift;
     my $other = shift;
     
     my $numRows = $self->numRows;
     my $numCols = $self->numCols;
     
-    if (ref $other && ($numRows != $other->numRows || $numCols != $other->numCols)) {
+    if ((ref $other) && ($numRows != $other->numRows || $numCols != $other->numCols)) {
         print "\nMatrices must be the same size to add them together.\n";  die;
     }
     
@@ -914,11 +945,18 @@ sub plus
 
 sub minus
 {
-    # Subtract two matrices.
+    # Subtract two matrices or subtract a scalar from a matrix.
     my $self = shift;
     my $other = shift;
 
-    return $self->plus($other->dot(-1));
+    if (ref $other)
+    {
+        return $self->plus($other->dot(-1));
+    }
+    else
+    {
+        return $self->plus(-1 * $other);
+    }
 }
 
 
@@ -1013,7 +1051,7 @@ sub dot
         
         for (my $i = 0; $i < $prod->numRows; $i++) {
             for (my $j = 0; $j < $prod->numCols; $j++) {
-                $prod->set($i, $j, $self->row($i)->dotProduct($other->row($j)));
+                $prod->set($i, $j, $self->rows([$i])->dotProduct($other->rows([$j])));
             }
         }
     }
@@ -1068,6 +1106,39 @@ sub dotTimes
 
 
 
+sub dotDiv
+{
+    # Divide two matrices element-wise.
+    my $self = shift;
+    my $other = shift;
+    
+    my $numRows = $self->numRows;
+    my $numCols = $self->numCols;
+    
+    if (! ref $other)
+    {
+        print "\nInput must be a matrix to divide by element-wise.\n";  die;
+    }
+    elsif ($numRows != $other->numRows || $numCols != $other->numCols)
+    {
+        print "\nMatrices must be the same size to (dot) divide them.\n";  die;
+    }
+    
+    my $prod = Matrix::alloc($numRows, $numCols);
+    
+    for (my $i = 0; $i < $numRows; $i++)
+    {
+        for (my $j = 0; $j < $numCols; $j++)
+        {
+            $prod->set($i, $j, $self->item($i, $j) / $other->item($i, $j));
+        }
+    }
+    
+    return $prod;
+}
+
+
+
 sub pow
 {
     # Raise a matrix to a power element-wise.
@@ -1093,14 +1164,23 @@ sub norm
 {
     # Calculate the norm of a matrix (default is 2-norm).
     my $self = shift;
-    die "Only 1D matrices are supported right now.    " if $self->numRows > 1 && $self->numCols > 1;
+    if ($self->numRows > 1 && $self->numCols > 1)
+    {
+        print "\nOnly 1D matrices are supported right now.\n";  die;
+    }
     my $p = shift;
 
     $p = 2 if ! $p;
-    
     my $ell;
-    $ell = $self->numRows if $self->numCols == 1;
-    $ell = $self->numCols if $self->numRows == 1;
+    
+    if ($self->numCols == 1)
+    {
+        $ell = $self->numRows;
+    }
+    else
+    {
+        $ell = $self->numCols;
+    }
 
     my $norm = 0;
 
@@ -1155,24 +1235,15 @@ sub sin
 sub tan
 {
     my $self = shift;
-    
-    my $out = Matrix::alloc($self->numRows, $self->numCols);
-    
-    for (my $i = 0; $i < $self->numRows; $i++)
-    {
-        for (my $j = 0; $j < $self->numCols; $j++)
-        {
-            $out->set($i, $j, (CORE::sin $self->item($i, $j)) / (CORE::cos $self->item($i, $j)));
-        }
-    }
-    
-    return $out;
+    return $self->sin->dotDiv($self->cos);
 }
 
 
 
 sub wiggle
 {
+    # Move the coordinates in the matrix in a random direction by a random
+    # amount, where the max possible distance moved is controlled by $drMax.
     my $self = shift;
     if (scalar @_ != 1)
     {
@@ -1191,6 +1262,109 @@ sub wiggle
     my $dy = $dr->dotTimes($dth->sin);
     
     return $self->copy->plus($dx->vstack($dy));
+}
+
+################################################################################
+
+# Min and max stuff.
+
+sub minMax
+{
+    my $self = shift;
+    
+    my $min = $self->item(0, 0);
+    my $iMin = 0;
+    my $jMin = 0;
+    
+    my $max = $self->item(0, 0);
+    my $iMax = 0;
+    my $jMax = 0;
+    
+    for (my $i = 0; $i < $self->numRows; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            if ($self->item($i, $j) < $min)
+            {
+                $min = $self->item($i, $j);
+                $iMin = $i;
+                $jMin = $j;
+            }
+            
+            if ($self->item($i, $j) > $max)
+            {
+                $max = $self->item($i, $j);
+                $iMax = $i;
+                $jMax = $j;
+            }
+        }
+    }
+    
+    $$self{'min'}  = $min;
+    $$self{'iMin'} = $iMin;
+    $$self{'jMin'} = $jMin;
+    
+    $$self{'max'}  = $max;
+    $$self{'iMax'} = $iMax;
+    $$self{'jMax'} = $jMax;
+}
+
+
+
+sub min
+{
+    my $self = shift;
+    return $$self{'min'} if defined $$self{'min'};
+    $self->minMax;
+    return $$self{'min'} if defined $$self{'min'};
+    print "\nFailed to get the minimum value of the matrix.\n";  die;
+}
+
+sub iMin
+{
+    my $self = shift;
+    return $$self{'iMin'} if defined $$self{'iMin'};
+    $self->minMax;
+    return $$self{'iMin'} if defined $$self{'iMin'};
+    print "\nFailed to get the row index of the minimum value of the matrix.\n";  die;
+}
+
+sub jMin
+{
+    my $self = shift;
+    return $$self{'jMin'} if defined $$self{'jMin'};
+    $self->minMax;
+    return $$self{'jMin'} if defined $$self{'jMin'};
+    print "\nFailed to get the column index of the minimum value of the matrix.\n";  die;
+}
+
+
+
+sub max
+{
+    my $self = shift;
+    return $$self{'max'} if defined $$self{'max'};
+    $self->minMax;
+    return $$self{'max'} if defined $$self{'max'};
+    print "\nFailed to get the maximum value of the matrix.\n";  die;
+}
+
+sub iMax
+{
+    my $self = shift;
+    return $$self{'iMax'} if defined $$self{'iMax'};
+    $self->minMax;
+    return $$self{'iMax'} if defined $$self{'iMax'};
+    print "\nFailed to get the row index of the maximum value of the matrix.\n";  die;
+}
+
+sub jMax
+{
+    my $self = shift;
+    return $$self{'jMax'} if defined $$self{'jMax'};
+    $self->minMax;
+    return $$self{'jMax'} if defined $$self{'jMax'};
+    print "\nFailed to get the column index of the maximum value of the matrix.\n";  die;
 }
 
 ################################################################################
