@@ -206,6 +206,16 @@ sub test_spliceCols
 
 
 
+sub test_norm
+{
+    my $A = Matrix::ones(1, 4)->dot(-1)->plus(Matrix::rand(1, 4)->dot(2));
+    print "test_norm_\$A = \n";
+    $A->disp;
+    print "inf_norm(\$A) = " . $A->norm("inf") . "\n";
+}
+
+
+
 sub test_ALL
 {
     test_new;
@@ -223,6 +233,7 @@ sub test_ALL
     test_setCols;
     test_spliceRows;
     test_spliceCols;
+    test_norm;
 }
 
 ################################################################################
@@ -1184,12 +1195,31 @@ sub norm
 
     my $norm = 0;
 
-    for (my $j = 0; $j < $ell; $j++)
+    if ($p =~ /^inf(inity)?$/i)
     {
-        $norm += (abs $self->item($j)) ** $p;
+        $norm = abs $self->item(0);
+        
+        for (my $j = 1; $j < $ell; $j++)
+        {
+            my $val = abs $self->item($j);
+            $norm = $val if $val > $norm;
+        }
     }
-
-    return $norm ** (1 / $p);
+    elsif (TP::isNumber($p))
+    {
+        for (my $j = 0; $j < $ell; $j++)
+        {
+            $norm += (abs $self->item($j)) ** $p;
+        }
+        
+        $norm = $norm ** (1 / $p);
+    }
+    else
+    {
+        print "\nInput \$p must be either a number or \"inf\".  You used \"$p\".\n";  die;
+    }
+    
+    return $norm;
 }
 
 
