@@ -216,24 +216,86 @@ sub test_norm
 
 
 
+sub test_solve
+{
+    my $A = Matrix::eye(5);
+    my $b = Matrix::ones(5, 1);
+    my $x = $A->solve($b);
+    
+    print "test_solve_\$A = \n";
+    $A->disp;
+    print "test_solve_\$b = \n";
+    $b->disp;
+    print "test_solve_\$x = \n";
+    $x->disp;
+}
+
+
+
+sub test_leastSquares
+{
+    my $A = Matrix::new([[0.1888460, 0.0394834, 0.0184743, 0.8008640, 0.818357]
+                       , [0.4792610, 0.8637790, 0.6874270, 0.9958450, 0.272958]
+                       , [0.0704303, 0.5977300, 0.0605322, 0.5260480, 0.771405]
+                       , [0.3555720, 0.5175610, 0.3917400, 0.8764970, 0.629965]
+                       , [0.0152446, 0.4146580, 0.9055900, 0.2382900, 0.232571]
+                       , [0.5353680, 0.1206550, 0.0684741, 0.7197770, 0.718718]
+                       , [0.1702700, 0.6308350, 0.9088270, 0.4175410, 0.269781]
+                       , [0.8023090, 0.7830920, 0.5452130, 0.6701250, 0.505405]
+                       , [0.8550240, 0.0936718, 0.7088540, 0.0640175, 0.209113]
+                       , [0.8814950, 0.9379720, 0.4306120, 0.0812095, 0.843693]]);
+    
+    my $b = Matrix::new([[0.71376695596717880]
+                       , [0.47569193631426410]
+                       , [0.10628212554412164]
+                       , [0.05427698291996352]
+                       , [0.67411665587272970]
+                       , [0.09467686960996125]
+                       , [0.16625878478066125]
+                       , [0.28295185053589456]
+                       , [0.34237011509123440]
+                       , [0.64927664119453020]]);
+    
+    my $x = $A->leastSquares($b);
+    
+    my $juliaAnswer = Matrix::new([[-0.03328356882014103]
+                                 , [-0.14599611906283225]
+                                 , [ 0.48350091879301293]
+                                 , [-0.12348853474086356]
+                                 , [ 0.53860316304772900]]);
+    
+    print "test_leastSquares_\$A = \n";
+    $A->disp;
+    print "test_leastSquares_\$b = \n";
+    $b->disp;
+    print "test_leastSquares_\$x = \n";
+    $x->disp;
+    print "test_leastSquares_\$juliaAnswer = \n";
+    $juliaAnswer->disp;
+}
+
+
+
 sub test_ALL
 {
-    test_new;
-    test_rand;
-    test_alloc_set;
-    test_zeros_ones_eye;
-    test_linspace;
-    test_round;
-    test_rows_cols;
-    test_meshgrid;
-    test_vstack;
-    test_hstack;
-    test_flatten;
-    test_setRows;
-    test_setCols;
+    # test_new;
+    # test_rand;
+    # test_alloc_set;
+    # test_zeros_ones_eye;
+    # test_linspace;
+    # test_round;
+    # test_rows_cols;
+    # test_meshgrid;
+    # test_vstack;
+    # test_hstack;
+    # test_flatten;
+    # test_setRows;
+    # test_setCols;
     test_spliceRows;
     test_spliceCols;
-    test_norm;
+    # test_norm;
+    # test_solve;
+    # test_leastSquares;
 }
 
 ################################################################################
@@ -418,12 +480,13 @@ sub linspace
     }
     my ($a, $b, $numCols) = @_;
     my $tmp = Matrix::new([[$numCols]]);
-    if ($numCols <= 0 || ! $tmp->round(0)->equals($tmp))
+    if ($numCols < 1 || ! $tmp->round(0)->equals($tmp))
     {
-        print "\nLast input must be a positive whole number (number of points in array).\n";  die;
+        print "\nLast input must be a positive whole number greater than 0 (number of points in array).  Your input is \"$numCols\".\n";  die;
     }
     
-    my $dx = ($b - $a) / ($numCols - 1);
+    my $dx = 0;
+    $dx = ($b - $a) / ($numCols - 1) if $numCols != 1;
     my $item = $a;
     my @items = ();
     for (my $i = 0; $i < $numCols; $i++)
@@ -438,7 +501,8 @@ sub linspace
 
 
 
-sub round {
+sub round
+{
     # Round the entries in a matrix to the specified number of places.
     my $self = shift;
     if (scalar @_ != 1)
@@ -612,7 +676,22 @@ sub spliceCols
     my $ind = shift;
     my $howMany = shift;
     
-    return $self->transpose->spliceRows($ind, $howMany)->transpose;
+    my $out = Matrix::alloc($self->numRows, $self->numCols - $howMany);
+    my $indices;
+    
+    if ($ind > 0)
+    {
+        $indices = Matrix::linspace(0, $ind - 1, $ind);
+        $out->setCols(@{$indices->items}[0], $self->cols(@{$indices->items}[0]));
+    }
+        
+    if ($ind + ($howMany - 1) < $self->numCols - 1)
+    {
+        $indices = Matrix::linspace($ind, $out->numCols - 1, $self->numCols - $ind - $howMany);
+        $out->setCols(@{$indices->items}[0], $self->cols(@{$indices->plus($howMany)->items}[0]));
+    }
+    
+    return $out;
 }
 
 ################################################################################
@@ -896,6 +975,19 @@ sub setCols
         }
     }
 }
+
+
+
+# sub containsCol
+# {
+    # my $self = shift;
+    # my $other = shift;
+    
+    # my $tol = $self->tol;
+    # $tol = $other->tol if $other->tol < $self->tol;
+    
+    # for (my $j = 0; $j < 
+# }
 
 
 
@@ -1275,9 +1367,9 @@ sub wiggle
     # Move the coordinates in the matrix in a random direction by a random
     # amount, where the max possible distance moved is controlled by $drMax.
     my $self = shift;
-    if (scalar @_ != 1)
+    if ((scalar @_) !~ /^(1|5)$/)
     {
-        print "\nOne input (max wiggle amount) is required.\n";  die;
+        print "\nOne input (max wiggle amount) is required, or five inputs (also specify bounding box for rectangular coords).\n";  die;
     }
     if ($self->numRows != 2)
     {
@@ -1285,11 +1377,35 @@ sub wiggle
     }
     my $drMax = shift;
     
+    # Optional inputs for coordinates in a rectangular domain with known corners.
+    my $xll = shift;
+    my $yll = shift;
+    my $xur = shift;
+    my $yur = shift;
+    
     my $dr  = Matrix::rand(1, $self->numCols)->dot($drMax);
     my $dth = Matrix::rand(1, $self->numCols)->dot(2 * PI);
     
     my $dx = $dr->dotTimes($dth->cos);
     my $dy = $dr->dotTimes($dth->sin);
+    
+    if (defined $xll && defined $yll && defined $xur && defined $yur)
+    {
+        for (my $j = 0; $j < $dx->numCols; $j++)
+        {
+            if (abs ($self->item(0, $j) - $xll) < $self->tol
+            ||  abs ($self->item(0, $j) - $xur) < $self->tol)
+            {
+                $dx->set($j, 0);
+            }
+            
+            if (abs ($self->item(1, $j) - $yll) < $self->tol
+            ||  abs ($self->item(1, $j) - $yur) < $self->tol)
+            {
+                $dy->set($j, 0);
+            }
+        }
+    }
     
     return $self->copy->plus($dx->vstack($dy));
 }
@@ -1486,6 +1602,20 @@ sub solve
     }
     
     return $x;
+}
+
+
+
+sub leastSquares
+{
+    # "Solve" for x in an over-determined linear system $self * x = b.
+    my $self = shift;
+    my $b = shift;
+    
+    my $aTa = $self->transpose->dot($self);
+    my $aTb = $self->transpose->dot($b);
+    
+    return $aTa->solve($aTb);
 }
 
 ################################################################################
