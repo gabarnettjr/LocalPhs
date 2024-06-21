@@ -276,26 +276,52 @@ sub test_leastSquares
 
 
 
+sub test_sum
+{
+    my $A = Matrix::ones(5, 3);
+    my $sum = $A->sum;
+    
+    print "test_sum_\$A = \n";
+    $A->disp;
+    print "\$sum = $sum\n\n";
+}
+
+
+
+sub test_avg
+{
+    my $A = Matrix::rand(10, 10);
+    my $avg = $A->avg;
+    
+    print "test_avg_\$A = \n";
+    $A->disp;
+    print "\$avg = $avg\n\n";
+}
+
+
+
 sub test_ALL
 {
-    # test_new;
-    # test_rand;
-    # test_alloc_set;
-    # test_zeros_ones_eye;
-    # test_linspace;
-    # test_round;
-    # test_rows_cols;
-    # test_meshgrid;
-    # test_vstack;
-    # test_hstack;
-    # test_flatten;
-    # test_setRows;
-    # test_setCols;
+    test_new;
+    test_rand;
+    test_alloc_set;
+    test_zeros_ones_eye;
+    test_linspace;
+    test_round;
+    test_rows_cols;
+    test_meshgrid;
+    test_vstack;
+    test_hstack;
+    test_flatten;
+    test_setRows;
+    test_setCols;
     test_spliceRows;
     test_spliceCols;
-    # test_norm;
-    # test_solve;
-    # test_leastSquares;
+    test_norm;
+    test_solve;
+    test_leastSquares;
+    test_sum;
+    test_avg;
 }
 
 ################################################################################
@@ -701,7 +727,7 @@ sub len
     my $self = shift;
     return $self->numRows if $self->numCols == 1;
     return $self->numCols if $self->numRows == 1;
-    print "\nLength is only well-defined for a 1D matrix.\n";  die;
+    return $self->numRows * $self->numCols;
 }
 
 
@@ -804,7 +830,7 @@ sub disp
     {
         foreach my $item (@{$row})
         {
-            printf "%10.6f ", $item;
+            printf "%13.9f ", $item;
         }
         print "\n";
     }
@@ -1227,17 +1253,17 @@ sub dotDiv
         print "\nMatrices must be the same size to (dot) divide them.\n";  die;
     }
     
-    my $prod = Matrix::alloc($numRows, $numCols);
+    my $quot = Matrix::alloc($numRows, $numCols);
     
     for (my $i = 0; $i < $numRows; $i++)
     {
         for (my $j = 0; $j < $numCols; $j++)
         {
-            $prod->set($i, $j, $self->item($i, $j) / $other->item($i, $j));
+            $quot->set($i, $j, $self->item($i, $j) / $other->item($i, $j));
         }
     }
     
-    return $prod;
+    return $quot;
 }
 
 
@@ -1259,6 +1285,36 @@ sub pow
     }
     
     return $out;
+}
+
+
+
+sub sum
+{
+    # Return the sum of all elements of a matrix.
+    my $self = shift;
+    
+    my $sum = 0;
+    
+    for (my $i = 0; $i < $self->numRows; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            $sum += $self->item($i, $j);
+        }
+    }
+    
+    return $sum;
+}
+
+
+
+sub avg
+{
+    # Return the average of all elements of a matrix.
+    my $self = shift;
+    
+    return $self->sum / $self->len;
 }
 
 
@@ -1297,7 +1353,7 @@ sub norm
             $norm = $val if $val > $norm;
         }
     }
-    elsif (TP::isNumber($p))
+    else
     {
         for (my $j = 0; $j < $ell; $j++)
         {
@@ -1305,10 +1361,6 @@ sub norm
         }
         
         $norm = $norm ** (1 / $p);
-    }
-    else
-    {
-        print "\nInput \$p must be either a number or \"inf\".  You used \"$p\".\n";  die;
     }
     
     return $norm;
@@ -1612,10 +1664,9 @@ sub leastSquares
     my $self = shift;
     my $b = shift;
     
-    my $aTa = $self->transpose->dot($self);
-    my $aTb = $self->transpose->dot($b);
+    my $aT = $self->transpose;
     
-    return $aTa->solve($aTb);
+    return $aT->dot($self)->solve($aT->dot($b));
 }
 
 ################################################################################
