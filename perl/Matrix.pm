@@ -1459,7 +1459,7 @@ sub wiggle
     my $yur = shift;
     
     my $dr  = Matrix::rand(1, $self->numCols)->dot($drMax);
-    my $dth = Matrix::rand(1, $self->numCols)->dot(2 * PI);
+    my $dth = Matrix::rand(1, $self->numCols)->dot(2 * Matrix::PI);
     
     my $dx = $dr->dotTimes($dth->cos);
     my $dy = $dr->dotTimes($dth->sin);
