@@ -1319,6 +1319,29 @@ sub avg
 
 
 
+sub std
+{
+    # Return the sample standard deviation of all values in a matrix.
+    my $self = shift;
+    
+    my $out = 0;
+    my $avg = $self->avg;
+    
+    for (my $i = 0; $i < $self->numRows; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            $out += ($self->item($i, $j) - $avg) ** 2;
+        }
+    }
+    
+    $out = $out / ($self->len - 1);
+    $out = sqrt $out;
+    return $out;
+}
+
+
+
 sub norm
 {
     # Calculate the norm of a matrix (default is 2-norm).
