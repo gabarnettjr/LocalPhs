@@ -64,7 +64,7 @@ sub test_zeros_ones_eye
     $B->disp;
     
     my $c = Matrix::eye(5);
-    print "test_zeros_ones_eye_\$c = \n";
+    print "test_zeros_ones_eye_\$C = \n";
     $c->disp;
 }
 
@@ -194,15 +194,15 @@ sub test_spliceRows
 
 
 
-sub test_spliceCols
-{
-    my $A = Matrix::rand(3, 7);
-    print "test_spliceCols_\$A = \n";
-    $A->disp;
-    $A = $A->spliceCols(1, 3);
-    print "test_spliceCols_\$A = \n";
-    $A->disp;
-}
+# sub test_spliceCols
+# {
+    # my $A = Matrix::rand(3, 7);
+    # print "test_spliceCols_\$A = \n";
+    # $A->disp;
+    # $A = $A->spliceCols(1, 3);
+    # print "test_spliceCols_\$A = \n";
+    # $A->disp;
+# }
 
 
 
@@ -316,7 +316,7 @@ sub test_ALL
     test_setRows;
     test_setCols;
     test_spliceRows;
-    test_spliceCols;
+    # test_spliceCols;
     test_norm;
     test_solve;
     test_leastSquares;
@@ -696,29 +696,30 @@ sub spliceRows
 
 
 
-sub spliceCols
-{
-    my $self = shift;
-    my $ind = shift;
-    my $howMany = shift;
+# sub spliceCols
+# {
+    # # DANGER: This method is slow.  Transpose the matrix and use spliceRows.
+    # my $self = shift;
+    # my $ind = shift;
+    # my $howMany = shift;
     
-    my $out = Matrix::alloc($self->numRows, $self->numCols - $howMany);
-    my $indices;
+    # my $out = Matrix::alloc($self->numRows, $self->numCols - $howMany);
+    # my $indices;
     
-    if ($ind > 0)
-    {
-        $indices = Matrix::linspace(0, $ind - 1, $ind);
-        $out->setCols(@{$indices->items}[0], $self->cols(@{$indices->items}[0]));
-    }
+    # if ($ind > 0)
+    # {
+        # $indices = Matrix::linspace(0, $ind - 1, $ind);
+        # $out->setCols(@{$indices->items}[0], $self->cols(@{$indices->items}[0]));
+    # }
         
-    if ($ind + ($howMany - 1) < $self->numCols - 1)
-    {
-        $indices = Matrix::linspace($ind, $out->numCols - 1, $self->numCols - $ind - $howMany);
-        $out->setCols(@{$indices->items}[0], $self->cols(@{$indices->plus($howMany)->items}[0]));
-    }
+    # if ($ind + ($howMany - 1) < $self->numCols - 1)
+    # {
+        # $indices = Matrix::linspace($ind, $out->numCols - 1, $self->numCols - $ind - $howMany);
+        # $out->setCols(@{$indices->items}[0], $self->cols(@{$indices->plus($howMany)->items}[0]));
+    # }
     
-    return $out;
-}
+    # return $out;
+# }
 
 ################################################################################
 
@@ -821,6 +822,43 @@ sub flatten
 
 
 
+sub reshape
+{
+    # Reshape a row-vector to be the desired size.
+    
+    my $self = shift;
+
+    if ((scalar @_) != 2)
+    {
+        print "\nExactly two inputs (numRows and numCols) are required.\n";  die;
+    }
+
+    my $numRows = shift;
+    my $numCols = shift;
+
+    if ($self->numRows * $self->numCols != $numRows * $numCols)
+    {
+        print "\nTo reshape, the total number of elements must equal numRows * numCols.\n";  die;
+    }
+
+    my $out = Matrix::alloc($numRows, $numCols);
+    my $k = 0;
+    my $flat = $self->flatten;
+
+    for (my $i = 0; $i < $numRows; $i++)
+    {
+        for (my $j = 0; $j < $numCols; $j++)
+        {
+            $out->set($i, $j, $flat->item($k));
+            $k++;
+        }
+    }
+
+    return $out;
+}
+
+
+
 sub disp
 {
     # Display the contents of a matrix in a readable format.
@@ -830,7 +868,8 @@ sub disp
     {
         foreach my $item (@{$row})
         {
-            printf "%13.9f ", $item;
+            printf "%8.5f ", $item;
+            # printf "%13.9f ", $item;
         }
         print "\n";
     }
@@ -1342,6 +1381,62 @@ sub std
 
 
 
+sub mode
+{
+    my $self = shift;
+    my @numSame = ();
+    my @modes = ();
+    my $flatSelf = $self->flatten;
+    
+    foreach my $item (@{@{$flatSelf->items}[0]})
+    {
+        if (! @numSame && ! @modes)
+        {
+            push @numSame, 1;
+            push @modes, $item;
+        }
+        else
+        {
+            my $foundSame = 0;
+            
+            for (my $i = 0; $i < scalar @modes; $i++)
+            {
+                if (abs ($item - $modes[$i]) < $self->tol)
+                {
+                    $foundSame = 1;
+                    $numSame[$i]++;
+                }
+            }
+            
+            if (! $foundSame)
+            {
+                push @modes, $item;
+                push @numSame, 1;
+            }
+        }
+        
+        # # DEBUG
+        # print "modes:   ";
+        # foreach my $mode (@modes)
+        # {
+            # print $mode . " ";
+        # }
+        # print "\n";
+        # print "numSame: ";
+        # foreach my $same (@numSame)
+        # {
+            # print $same . " ";
+        # }
+        # print "\n\n";
+    }
+    
+    # Return the mode.
+    my $numSame = Matrix::new([\@numSame]);
+    return ($numSame->max, $modes[$numSame->jMax]);
+}
+
+
+
 sub norm
 {
     # Calculate the norm of a matrix (default is 2-norm).
@@ -1586,6 +1681,32 @@ sub jMax
     $self->minMax;
     return $$self{'jMax'} if defined $$self{'jMax'};
     print "\nFailed to get the column index of the maximum value of the matrix.\n";  die;
+}
+
+################################################################################
+
+sub toFile
+{
+    my $self = shift;
+    my $filePath = shift;
+    
+    (open TXT, ">$filePath") || die;
+    
+    for (my $i = 0; $i < $self->numRows; $i++)
+    {
+        for (my $j = 0; $j < $self->numCols; $j++)
+        {
+            my $tmp = $self->item($i, $j);
+            $tmp =~ s/\s+//g;
+            print TXT $tmp;
+            print TXT ' ' if $j != $self->numCols - 1;
+        }
+        
+        print TXT "\n" if $i != $self->numRows - 1;
+    }
+    
+    close TXT;
+    sleep 1 while ! -e $filePath;
 }
 
 ################################################################################
